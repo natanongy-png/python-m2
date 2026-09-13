@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>python.py — สรุปความรู้ภาษา Python สำหรับ ม.ต้น</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@500;600;700&family=Sarabun:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f2f8fd;
+  --bg2:#e7f1fa;
+  --panel:#ffffff;
+  --panel-alt:#f3f8fc;
+  --border:#dbe8f3;
+  --ink:#22303d;
+  --text:#3a4c5c;
+  --text-dim:#728296;
+  --blue:#2f7bc7;
+  --blue-dim:#a9cdea;
+  --yellow:#ffd43b;
+  --coral:#ff6f61;
+  --green:#1fae72;
+  --red:#e5484d;
+  --purple:#8b5cf6;
+  --pink:#ff6fa5;
+  --code-bg:#0d1620;
+  --code-panel-alt:#1c2a39;
+  --code-border:#2a3d52;
+  --code-text:#dce6f0;
+  --code-text-dim:#8fa2b8;
+  --mono:'JetBrains Mono', monospace;
+  --display:'Kanit', sans-serif;
+  --body:'Sarabun', sans-serif;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:
+    radial-gradient(ellipse 700px 420px at 6% -5%, rgba(255,212,59,0.18), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 100% 0%, rgba(47,123,199,0.10), transparent 55%),
+    radial-gradient(ellipse 650px 420px at 55% 100%, rgba(255,111,165,0.10), transparent 55%),
+    var(--bg);
+  color:var(--text);
+  font-family:var(--body);
+  line-height:1.7;
+}
+a{color:inherit;}
+::selection{background:var(--yellow);color:#1c2530;}
+
+/* ---------- gutter (signature element) ---------- */
+.gutter{
+  position:fixed;
+  top:0; left:0; bottom:0;
+  width:46px;
+  background:var(--bg2);
+  border-right:1px solid var(--border);
+  z-index:5;
+  display:none;
+}
+@media(min-width:900px){ .gutter{display:block;} body{padding-left:46px;} }
+.gutter-num{
+  font-family:var(--mono);
+  font-size:11px;
+  color:var(--text-dim);
+  text-align:right;
+  padding-right:8px;
+  opacity:.55;
+}
+
+/* ---------- top bar ---------- */
+.topbar{
+  position:sticky; top:0; z-index:10;
+  background:rgba(242,248,253,.92);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border);
+}
+.tab-row{
+  display:flex; align-items:center; gap:10px;
+  padding:12px 20px;
+  border-bottom:1px solid var(--border);
+}
+.dots{display:flex; gap:6px;}
+.dot{width:11px; height:11px; border-radius:50%;}
+.dot.r{background:#ff5f57;} .dot.y{background:#febc2e;} .dot.g{background:#28c840;}
+.filename{
+  font-family:var(--mono); font-size:13px; color:var(--text-dim);
+  margin-left:6px; padding:4px 10px; background:var(--panel); border-radius:6px 6px 0 0;
+  border:1px solid var(--border); border-bottom:none;
+}
+.filename b{color:var(--blue); font-weight:700;}
+.nav-scroll{
+  display:flex; gap:6px; overflow-x:auto; padding:10px 16px;
+  scrollbar-width:thin;
+}
+.nav-scroll::-webkit-scrollbar{height:5px;}
+.nav-scroll::-webkit-scrollbar-thumb{background:var(--border); border-radius:3px;}
+.nav-pill{
+  flex:0 0 auto;
+  font-family:var(--mono); font-size:12.5px;
+  color:var(--text-dim);
+  background:var(--panel);
+  border:1px solid var(--border);
+  padding:6px 12px; border-radius:20px;
+  white-space:nowrap; text-decoration:none;
+  transition:.15s;
+}
+.nav-pill:hover{color:#fff; background:var(--blue); border-color:var(--blue);}
+.nav-pill.worksheet-link{color:#1c2530; background:var(--yellow); border-color:var(--yellow); font-weight:700;}
+.nav-pill.worksheet-link:hover{background:#ffc60d;}
+.student-badge{font-family:var(--mono); font-size:11.5px; color:var(--ink); padding:5px 12px; border-radius:20px; background:#eaf3fc; border:1px solid var(--blue-dim); white-space:nowrap;}
+.student-badge a{color:var(--coral); text-decoration:none; font-weight:700;}
+.student-badge a:hover{text-decoration:underline;}
+
+/* ---------- hero ---------- */
+.hero{
+  padding:70px 24px 50px;
+  max-width:1000px; margin:0 auto;
+  text-align:center;
+}
+.eyebrow{
+  font-family:var(--mono); font-size:13px; color:#189a63; font-weight:700;
+}
+.eyebrow::before{content:"›_ ";}
+h1.title{
+  font-family:var(--display); font-weight:700;
+  font-size:clamp(32px,5vw,54px);
+  margin:14px 0 10px;
+  color:var(--ink);
+}
+h1.title .py{color:#d99000;}
+.subtitle{color:var(--text-dim); font-size:17px; max-width:640px; margin:0 auto;}
+.hero-code{
+  margin:34px auto 0; max-width:560px; text-align:left;
+  background:var(--code-bg); border:1px solid var(--code-border); border-radius:10px;
+  overflow:hidden; box-shadow:0 20px 50px -20px rgba(20,60,100,.35);
+}
+.hero-code .bar{
+  display:flex; align-items:center; gap:8px; padding:10px 14px;
+  background:var(--code-panel-alt); border-bottom:1px solid var(--code-border);
+}
+.hero-code pre{
+  margin:0; padding:18px 20px; font-family:var(--mono); font-size:14px; overflow-x:auto;
+  color:var(--code-text);
+}
+.k{color:#c792ea;} .s{color:#7ee2ab;} .c{color:var(--code-text-dim);} .f{color:#7ab8ec;} .n{color:#ff9d8a;}
+
+/* ---------- section layout ---------- */
+main{max-width:1000px; margin:0 auto; padding:10px 20px 40px;}
+section.block{
+  margin:56px 0;
+  scroll-margin-top:120px;
+}
+.block-head{
+  display:flex; align-items:baseline; gap:14px;
+  margin-bottom:18px;
+  border-bottom:1px solid var(--border);
+  padding-bottom:12px;
+}
+.block-num{
+  font-family:var(--mono); color:#fff; font-size:15px; font-weight:700;
+  background:var(--blue); border-radius:6px;
+  padding:3px 10px;
+  box-shadow:0 3px 8px -2px rgba(0,0,0,.2);
+}
+section.block:nth-of-type(5n+2) .block-num{background:var(--coral);}
+section.block:nth-of-type(5n+3) .block-num{background:var(--green);}
+section.block:nth-of-type(5n+4) .block-num{background:var(--purple);}
+section.block:nth-of-type(5n+5) .block-num{background:var(--pink);}
+.block-head h2{
+  font-family:var(--display); font-weight:600; font-size:24px; margin:0; color:var(--ink);
+}
+.block-desc{color:var(--text-dim); margin:0 0 18px; font-size:15.5px;}
+
+.card{
+  background:var(--panel); border:1px solid var(--border); border-radius:12px;
+  padding:20px 22px; margin-bottom:16px;
+  box-shadow:0 10px 26px -20px rgba(20,40,60,.35);
+}
+.grid2{display:grid; grid-template-columns:1fr; gap:16px;}
+@media(min-width:720px){ .grid2{grid-template-columns:1fr 1fr;} }
+
+pre.code{
+  background:var(--code-bg); border:1px solid var(--code-border); border-radius:8px;
+  padding:16px 18px; font-family:var(--mono); font-size:13.5px; overflow-x:auto;
+  margin:0; color:var(--code-text);
+}
+pre.code .tag{color:var(--code-text-dim); font-size:11px; display:block; margin-bottom:8px; letter-spacing:.04em;}
+
+table{width:100%; border-collapse:collapse; font-size:14.5px;}
+th,td{padding:10px 12px; text-align:left; border-bottom:1px solid var(--border);}
+th{
+  font-family:var(--mono); font-size:12px; color:var(--blue); text-transform:uppercase; letter-spacing:.05em;
+  border-bottom:2px solid var(--blue-dim);
+}
+td.mono, th.mono{font-family:var(--mono);}
+tr:last-child td{border-bottom:none;}
+.pill-true{color:var(--green); font-family:var(--mono); font-weight:700;}
+.pill-false{color:var(--red); font-family:var(--mono); font-weight:700;}
+
+ul.check{list-style:none; padding:0; margin:0;}
+ul.check li{position:relative; padding-left:22px; margin-bottom:9px; font-size:15px;}
+ul.check li::before{content:"▸"; position:absolute; left:0; color:var(--blue);}
+
+.keyword-grid{
+  display:flex; flex-wrap:wrap; gap:8px;
+}
+.keyword-grid span{
+  font-family:var(--mono); font-size:13px; color:#7c3aed;
+  background:#f2ecff; border:1px solid #ddccff; padding:4px 10px; border-radius:6px;
+  font-weight:600;
+}
+
+.step-flow{display:flex; flex-direction:column; gap:0;}
+.step{
+  font-family:var(--mono); font-size:13.5px; padding:10px 14px;
+  border-left:2px solid var(--blue-dim); position:relative; margin-left:8px;
+}
+.step::before{
+  content:""; position:absolute; left:-6px; top:16px; width:9px; height:9px;
+  border-radius:50%; background:var(--blue);
+}
+.step b{color:var(--blue);}
+.step .res{color:var(--green); font-weight:700;}
+
+.note{
+  border-left:3px solid var(--yellow); background:#fff8e1;
+  padding:12px 16px; border-radius:0 8px 8px 0; font-size:14.5px; color:var(--text);
+}
+
+/* ---------- worksheets ---------- */
+#worksheets{
+  background:var(--panel-alt); border:1px solid var(--border); border-radius:16px;
+  padding:36px 28px; margin:70px 0 40px;
+}
+#worksheets .block-head{border-bottom:1px solid var(--border);}
+.ws-grid{display:grid; grid-template-columns:1fr; gap:14px; margin-top:20px;}
+@media(min-width:720px){ .ws-grid{grid-template-columns:1fr 1fr;} }
+.ws-card{
+  background:var(--panel); border:1px solid var(--border); border-radius:12px;
+  padding:18px 20px; display:flex; flex-direction:column; gap:10px;
+  transition:.15s; text-decoration:none; color:var(--text);
+  box-shadow:0 8px 22px -18px rgba(20,40,60,.4);
+}
+.ws-card:hover{border-color:var(--blue); transform:translateY(-2px); box-shadow:0 14px 28px -18px rgba(47,123,199,.4);}
+.ws-top{display:flex; justify-content:space-between; align-items:center;}
+.ws-file{font-family:var(--mono); font-size:12.5px; color:var(--text-dim);}
+.ws-num{font-family:var(--mono); color:var(--blue); font-weight:700; font-size:13px;}
+.ws-title{font-family:var(--display); font-weight:600; font-size:17px; color:var(--ink); margin:0;}
+.ws-desc{font-size:13.5px; color:var(--text-dim); margin:0;}
+.ws-open{
+  margin-top:6px; font-family:var(--mono); font-size:12.5px; color:var(--blue);
+  display:flex; align-items:center; gap:6px; font-weight:600;
+}
+.ws-card:hover .ws-open{color:var(--coral);}
+
+footer{
+  text-align:center; padding:30px 20px 60px; color:var(--text-dim); font-size:13px; font-family:var(--mono);
+}
+
+@media(prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} }
+
+</style>
+</head>
+<body>
+
+<div class="gutter" id="gutter"></div>
+
+<div class="topbar">
+  <div class="tab-row">
+    <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+    <div class="filename">🐍 <b>python_summary</b>.py</div>
+    <span class="student-badge" id="student-badge" style="margin-left:auto;">👤 กำลังตรวจสอบ...</span>
+  </div>
+  <div class="nav-scroll">
+    <a class="nav-pill" href="#s1">01 ความหมาย</a>
+    <a class="nav-pill" href="#s2">02 print/input</a>
+    <a class="nav-pill" href="#s3">03 ตัวแปร</a>
+    <a class="nav-pill" href="#s4">04 ชนิดข้อมูล</a>
+    <a class="nav-pill" href="#s5">05 คณิตศาสตร์</a>
+    <a class="nav-pill" href="#s6">06 เปรียบเทียบ</a>
+    <a class="nav-pill" href="#s7">07 if-elif-else</a>
+    <a class="nav-pill" href="#s8">08 loop</a>
+    <a class="nav-pill" href="#s9">09 data structure</a>
+    <a class="nav-pill" href="#s10">10 function</a>
+    <a class="nav-pill" href="#s11">11 comment</a>
+    <a class="nav-pill" href="#s12">12 ตัวอย่าง</a>
+    <a class="nav-pill worksheet-link" href="#worksheets">📄 ใบงาน</a>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="eyebrow">chompoo/computing — มัธยมศึกษาปีที่ 2</div>
+  <h1 class="title">สรุปความรู้ภาษา <span class="py">Python</span></h1>
+  <p class="subtitle">คู่มือฉบับย่อสำหรับนักเรียนชั้น ม.ต้น ครบทั้งไวยากรณ์พื้นฐาน ตัวอย่างโค้ด และใบงานฝึกปฏิบัติ</p>
+  <div class="hero-code">
+    <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+    <pre><span class="c"># โปรแกรมแรกของฉัน</span>
+<span class="f">print</span>(<span class="s">"Hello, Python!"</span>)
+name = <span class="f">input</span>(<span class="s">"ชื่อของคุณ: "</span>)
+<span class="f">print</span>(<span class="s">"ยินดีต้อนรับ,"</span>, name)</pre>
+  </div>
+</div>
+
+<main>
+
+<!-- 1 -->
+<section class="block" id="s1">
+  <div class="block-head"><span class="block-num">01</span><h2>Python คืออะไร?</h2></div>
+  <div class="card">
+    <p>Python คือภาษาคอมพิวเตอร์ที่ใช้งานง่าย จัดเป็นภาษาระดับสูง (High-level Language) อ่านและเขียนได้ใกล้เคียงภาษาอังกฤษทั่วไป จึงเหมาะสำหรับผู้เริ่มต้นเขียนโปรแกรม</p>
+    <p class="block-desc" style="margin-top:14px;">นำไปประยุกต์ใช้งานได้หลากหลาย เช่น</p>
+    <ul class="check">
+      <li>เขียนโปรแกรมทั่วไป (Software Development)</li>
+      <li>วิเคราะห์ข้อมูล (Data Analysis)</li>
+      <li>พัฒนาเว็บไซต์ (Web Development)</li>
+      <li>สร้างเกม (Game Development)</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 2 -->
+<section class="block" id="s2">
+  <div class="block-head"><span class="block-num">02</span><h2>การแสดงผล และรับข้อมูล</h2></div>
+  <div class="grid2">
+    <div class="card">
+      <p class="block-desc"><b style="color:var(--ink);">แสดงผล — print()</b></p>
+      <pre class="code"><span class="tag">แสดงข้อความออกทางหน้าจอ</span><span class="f">print</span>(<span class="s">"ข้อความ"</span>)
+
+<span class="c"># ตัวอย่าง</span>
+<span class="f">print</span>(<span class="s">"Hello, Python!"</span>)
+<span class="c"># ผลลัพธ์: Hello, Python!</span></pre>
+    </div>
+    <div class="card">
+      <p class="block-desc"><b style="color:var(--ink);">รับข้อมูล — input()</b></p>
+      <pre class="code"><span class="tag">รับข้อมูลจากผู้ใช้ (ได้ชนิด str เสมอ)</span><span class="f">input</span>(<span class="s">"ข้อความ"</span>)
+
+<span class="c"># ตัวอย่าง</span>
+name = <span class="f">input</span>(<span class="s">"ชื่อของคุณ: "</span>)
+<span class="f">print</span>(<span class="s">"สวัสดี"</span>, name)</pre>
+    </div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="block" id="s3">
+  <div class="block-head"><span class="block-num">03</span><h2>ตัวแปร (Variable)</h2></div>
+  <div class="card">
+    <p>ตัวแปร คือ พื้นที่สำหรับเก็บข้อมูล โดยไม่ต้องประกาศชนิดข้อมูลล่วงหน้า รูปแบบ: <b style="color:var(--yellow);">ชื่อตัวแปร = ข้อมูล</b></p>
+    <pre class="code" style="margin-top:12px;">name = <span class="s">"Alex"</span>       <span class="c"># ข้อความ</span>
+age = <span class="n">14</span>            <span class="c"># ตัวเลข</span>
+height = <span class="n">165.5</span>       <span class="c"># ทศนิยม</span>
+is_student = <span class="k">True</span>    <span class="c"># จริง/เท็จ</span></pre>
+  </div>
+  <div class="card">
+    <p class="block-desc" style="margin-bottom:10px;"><b style="color:var(--ink);">กฎการตั้งชื่อตัวแปร</b></p>
+    <ul class="check">
+      <li>ต้องขึ้นต้นด้วยตัวอักษร (a-z, A-Z) หรือเครื่องหมาย <span style="font-family:var(--mono);color:var(--yellow);">_</span> เท่านั้น</li>
+      <li>ห้ามขึ้นต้นด้วยตัวเลข เช่น <span style="font-family:var(--mono);color:var(--red);">1name</span> ผิด</li>
+      <li>ห้ามมีช่องว่างหรืออักขระพิเศษ เช่น <span style="font-family:var(--mono);color:var(--red);">- @ ! %</span> (ใช้ _ แทนช่องว่างได้)</li>
+      <li>ตัวพิมพ์เล็ก-ใหญ่มีผลต่างกัน เช่น <span style="font-family:var(--mono);">Name</span> กับ <span style="font-family:var(--mono);">name</span> ถือเป็นคนละตัวแปร</li>
+      <li>ห้ามตั้งชื่อซ้ำกับ <b>คำสงวน (Keyword)</b> ของภาษา Python</li>
+    </ul>
+    <p class="block-desc" style="margin:16px 0 10px;"><b style="color:var(--ink);">คำสงวน (Reserved Words) ห้ามนำมาตั้งชื่อตัวแปร</b></p>
+    <div class="keyword-grid">
+      <span>False</span><span>None</span><span>True</span><span>and</span><span>as</span><span>assert</span>
+      <span>async</span><span>await</span><span>break</span><span>class</span><span>continue</span><span>def</span>
+      <span>del</span><span>elif</span><span>else</span><span>except</span><span>finally</span><span>for</span>
+      <span>from</span><span>global</span><span>if</span><span>import</span><span>in</span><span>is</span>
+      <span>lambda</span><span>nonlocal</span><span>not</span><span>or</span><span>pass</span><span>raise</span>
+      <span>return</span><span>try</span><span>while</span><span>with</span><span>yield</span>
+    </div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="block" id="s4">
+  <div class="block-head"><span class="block-num">04</span><h2>ชนิดข้อมูลพื้นฐาน</h2></div>
+  <div class="card">
+    <table>
+      <tr><th>ชนิดข้อมูล</th><th>ตัวอย่าง</th><th>คำอธิบาย</th></tr>
+      <tr><td class="mono" style="color:var(--green);">str</td><td class="mono">"Hello"</td><td>ข้อความ อยู่ในเครื่องหมายคำพูด " "</td></tr>
+      <tr><td class="mono" style="color:var(--coral);">int</td><td class="mono">10, -5, 0</td><td>จำนวนเต็ม</td></tr>
+      <tr><td class="mono" style="color:var(--blue);">float</td><td class="mono">3.14, -0.5</td><td>จำนวนที่มีจุดทศนิยม</td></tr>
+      <tr><td class="mono" style="color:var(--purple);">bool</td><td class="mono">True, False</td><td>ค่าความจริง (จริง/เท็จ)</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- 5 -->
+<section class="block" id="s5">
+  <div class="block-head"><span class="block-num">05</span><h2>ตัวดำเนินการทางคณิตศาสตร์</h2></div>
+  <div class="card">
+    <table>
+      <tr><th>ตัวดำเนินการ</th><th>ความหมาย</th><th>ตัวอย่าง</th></tr>
+      <tr><td class="mono">+</td><td>บวก</td><td class="mono">5 + 3 = 8</td></tr>
+      <tr><td class="mono">-</td><td>ลบ</td><td class="mono">5 - 3 = 2</td></tr>
+      <tr><td class="mono">*</td><td>คูณ</td><td class="mono">5 * 3 = 15</td></tr>
+      <tr><td class="mono">/</td><td>หาร (ได้ทศนิยม)</td><td class="mono">5 / 2 = 2.5</td></tr>
+      <tr><td class="mono">//</td><td>หารเอาแต่จำนวนเต็ม</td><td class="mono">5 // 2 = 2</td></tr>
+      <tr><td class="mono">%</td><td>หารเอาเศษ</td><td class="mono">5 % 2 = 1</td></tr>
+      <tr><td class="mono">**</td><td>ยกกำลัง</td><td class="mono">2 ** 3 = 8</td></tr>
+    </table>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <p class="block-desc" style="margin-bottom:10px;"><b style="color:var(--ink);">ลำดับการดำเนินการ (ทำก่อน-หลัง)</b></p>
+      <ul class="check">
+        <li><span class="mono" style="color:var(--yellow);">( )</span> วงเล็บ — ทำก่อนเสมอ</li>
+        <li><span class="mono" style="color:var(--yellow);">**</span> ยกกำลัง</li>
+        <li><span class="mono" style="color:var(--yellow);">* / // %</span> คูณ หาร (ซ้ายไปขวา)</li>
+        <li><span class="mono" style="color:var(--yellow);">+ -</span> บวก ลบ (ซ้ายไปขวา)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <p class="block-desc" style="margin-bottom:10px;"><b style="color:var(--ink);">ตัวอย่างวิธีคำนวณทีละขั้น</b></p>
+      <div class="step-flow">
+        <div class="step">2 + 3 * 4 ** 2 - 6 / 2</div>
+        <div class="step"><b>4 ** 2</b> = 16 → 2 + 3 * <b>16</b> - 6 / 2</div>
+        <div class="step"><b>3 * 16</b> = 48 → 2 + <b>48</b> - 6 / 2</div>
+        <div class="step"><b>6 / 2</b> = 3.0 → 2 + 48 - <b>3.0</b></div>
+        <div class="step">2 + 48 - 3.0 = <span class="res">47.0</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="block" id="s6">
+  <div class="block-head"><span class="block-num">06</span><h2>การเปรียบเทียบ (เงื่อนไข)</h2></div>
+  <div class="card">
+    <table>
+      <tr><th>ตัวดำเนินการ</th><th>ความหมาย</th><th>ตัวอย่าง</th></tr>
+      <tr><td class="mono">==</td><td>เท่ากับ</td><td class="mono">5 == 5</td></tr>
+      <tr><td class="mono">!=</td><td>ไม่เท่ากับ</td><td class="mono">5 != 3</td></tr>
+      <tr><td class="mono">&gt;</td><td>มากกว่า</td><td class="mono">5 &gt; 3</td></tr>
+      <tr><td class="mono">&lt;</td><td>น้อยกว่า</td><td class="mono">5 &lt; 3</td></tr>
+      <tr><td class="mono">&gt;=</td><td>มากกว่าหรือเท่ากับ</td><td class="mono">5 &gt;= 5</td></tr>
+      <tr><td class="mono">&lt;=</td><td>น้อยกว่าหรือเท่ากับ</td><td class="mono">5 &lt;= 3</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <p class="block-desc" style="margin-bottom:10px;"><b style="color:var(--ink);">ตารางเทียบผลลัพธ์ True / False</b></p>
+    <table>
+      <tr><th>นิพจน์</th><th>ผลลัพธ์</th></tr>
+      <tr><td class="mono">5 == 5</td><td class="pill-true">True</td></tr>
+      <tr><td class="mono">5 != 3</td><td class="pill-true">True</td></tr>
+      <tr><td class="mono">5 &gt; 3</td><td class="pill-true">True</td></tr>
+      <tr><td class="mono">3 &gt; 5</td><td class="pill-false">False</td></tr>
+      <tr><td class="mono">5 &gt;= 5</td><td class="pill-true">True</td></tr>
+      <tr><td class="mono">3 &lt;= 1</td><td class="pill-false">False</td></tr>
+      <tr><td class="mono">10 &lt; 2</td><td class="pill-false">False</td></tr>
+      <tr><td class="mono">7 == 7.0</td><td class="pill-true">True</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- 7 -->
+<section class="block" id="s7">
+  <div class="block-head"><span class="block-num">07</span><h2>คำสั่งเงื่อนไข (if-elif-else)</h2></div>
+  <div class="grid2">
+    <div class="card">
+      <pre class="code">score = <span class="f">int</span>(<span class="f">input</span>(<span class="s">"คะแนน: "</span>))
+
+<span class="k">if</span> score &gt;= <span class="n">80</span>:
+    <span class="f">print</span>(<span class="s">"เกรด A"</span>)
+<span class="k">elif</span> score &gt;= <span class="n">50</span>:
+    <span class="f">print</span>(<span class="s">"เกรด B"</span>)
+<span class="k">else</span>:
+    <span class="f">print</span>(<span class="s">"เกรด C"</span>)</pre>
+    </div>
+    <div class="card">
+      <p class="block-desc" style="margin-bottom:10px;"><b style="color:var(--ink);">การทำงาน</b></p>
+      <ul class="check">
+        <li>ถ้า <span class="mono">score &gt;= 80</span> → ทำงานบรรทัดใต้ <span class="mono">if</span></li>
+        <li>ไม่ใช่ แต่ <span class="mono">score &gt;= 50</span> → ทำงานบรรทัดใต้ <span class="mono">elif</span></li>
+        <li>ไม่เข้าเงื่อนไขใดเลย → ทำงานบรรทัดใต้ <span class="mono">else</span></li>
+      </ul>
+      <div class="note" style="margin-top:14px;">ตรวจเงื่อนไขจากบนลงล่างทีละบรรทัด และจะทำงานเพียงเงื่อนไขเดียวที่ตรงก่อนเท่านั้น</div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 -->
+<section class="block" id="s8">
+  <div class="block-head"><span class="block-num">08</span><h2>การวนซ้ำ (Loop)</h2></div>
+  <div class="grid2">
+    <div class="card">
+      <p class="block-desc" style="margin-bottom:10px;"><b style="color:var(--ink);">for loop</b></p>
+      <pre class="code"><span class="k">for</span> i <span class="k">in</span> <span class="f">range</span>(<span class="n">1</span>, <span class="n">6</span>):
+    <span class="f">print</span>(i)
+<span class="c"># แสดง 1 ถึง 5</span></pre>
+      <p style="font-size:13.5px; color:var(--text-dim); margin-top:12px;"><span class="mono" style="color:var(--yellow);">range(เริ่ม, จบ)</span> เริ่มต้นที่ "เริ่ม" และจบก่อนถึง "จบ" เพิ่มทีละ 1</p>
+    </div>
+    <div class="card">
+      <p class="block-desc" style="margin-bottom:10px;"><b style="color:var(--ink);">while loop</b></p>
+      <pre class="code">i = <span class="n">1</span>
+<span class="k">while</span> i &lt;= <span class="n">5</span>:
+    <span class="f">print</span>(i)
+    i = i + <span class="n">1</span>
+<span class="c"># แสดง 1 ถึง 5</span></pre>
+      <p style="font-size:13.5px; color:var(--text-dim); margin-top:12px;">ทำงานซ้ำ "ตราบใดที่" เงื่อนไขยังเป็นจริง ต้องเพิ่มค่าตัวแปรเองไม่ให้วนไม่รู้จบ</p>
+    </div>
+  </div>
+</section>
+
+<!-- 9 -->
+<section class="block" id="s9">
+  <div class="block-head"><span class="block-num">09</span><h2>โครงสร้างข้อมูล (Data Structure)</h2></div>
+  <div class="grid2">
+    <div class="card">
+      <p class="block-desc" style="margin-bottom:10px;"><b style="color:var(--ink);">List (รายการ)</b></p>
+      <p style="font-size:14px; color:var(--text-dim);">เก็บข้อมูลได้หลายค่าในตัวแปรเดียว เรียงลำดับ และแก้ไขได้</p>
+      <pre class="code">fruits = [<span class="s">'apple'</span>, <span class="s">'banana'</span>, <span class="s">'orange'</span>]
+<span class="f">print</span>(fruits[<span class="n">0</span>])   <span class="c"># apple</span>
+<span class="f">print</span>(<span class="f">len</span>(fruits)) <span class="c"># 3</span></pre>
+    </div>
+    <div class="card">
+      <p class="block-desc" style="margin-bottom:10px;"><b style="color:var(--ink);">Dictionary (พจนานุกรม)</b></p>
+      <p style="font-size:14px; color:var(--text-dim);">เก็บข้อมูลเป็นคู่ key : value ค้นหาค่าด้วย key</p>
+      <pre class="code">student = {<span class="s">'name'</span>: <span class="s">'Alex'</span>, <span class="s">'age'</span>: <span class="n">14</span>}
+<span class="f">print</span>(student[<span class="s">"name"</span>]) <span class="c"># Alex</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- 10 -->
+<section class="block" id="s10">
+  <div class="block-head"><span class="block-num">10</span><h2>ฟังก์ชัน (Function)</h2></div>
+  <div class="card">
+    <p>ฟังก์ชัน คือ การสร้างชุดคำสั่งเก็บไว้เป็นก้อนเดียว แล้วเรียกใช้งานซ้ำได้ตามต้องการ ช่วยลดการเขียนโค้ดซ้ำๆ</p>
+    <pre class="code" style="margin-top:12px;"><span class="k">def</span> <span class="f">greet</span>(name):
+    <span class="f">print</span>(<span class="s">"สวัสดี"</span>, name)
+
+<span class="f">greet</span>(<span class="s">"มายด์"</span>)  <span class="c"># เรียกใช้งาน</span></pre>
+  </div>
+</section>
+
+<!-- 11 -->
+<section class="block" id="s11">
+  <div class="block-head"><span class="block-num">11</span><h2>คอมเมนต์ (Comment)</h2></div>
+  <div class="card">
+    <p style="margin-bottom:12px;">ข้อความที่เขียนอธิบายโค้ด โดยที่ Python จะไม่นำไปประมวลผล ใช้ช่วยให้โค้ดอ่านเข้าใจง่ายขึ้น</p>
+    <pre class="code"><span class="c"># คอมเมนต์บรรทัดเดียว</span>
+<span class="f">print</span>(<span class="s">"Hello"</span>)  <span class="c"># แสดงข้อความ</span>
+
+<span class="s">'''
+คอมเมนต์หลายบรรทัด
+ใช้คู่กับเครื่องหมาย triple quotes
+'''</span></pre>
+  </div>
+</section>
+
+<!-- 12 -->
+<section class="block" id="s12">
+  <div class="block-head"><span class="block-num">12</span><h2>ตัวอย่างโปรแกรมง่าย ๆ</h2></div>
+  <div class="card">
+    <p class="block-desc" style="margin-bottom:10px;">โปรแกรมคำนวณพื้นที่สี่เหลี่ยม</p>
+    <pre class="code">width = <span class="f">float</span>(<span class="f">input</span>(<span class="s">"ความกว้าง: "</span>))
+height = <span class="f">float</span>(<span class="f">input</span>(<span class="s">"ความยาว: "</span>))
+area = width * height
+<span class="f">print</span>(<span class="s">"พื้นที่สี่เหลี่ยม ="</span>, area, <span class="s">"ตารางหน่วย"</span>)</pre>
+  </div>
+  <div class="note">💡 เคล็ดลับ: ฝึกเขียนบ่อยๆ ลองทำโจทย์ทีละน้อย อย่ากลัวที่จะลองผิดลองถูก และค้นคว้าถามเมื่อไม่เข้าใจ</div>
+</section>
+
+<!-- WORKSHEETS -->
+<section id="worksheets">
+  <div class="block-head" style="border-bottom-color:var(--border);">
+    <span class="block-num" style="background:var(--yellow); color:#0f1720;">📄</span>
+    <h2>ใบงานฝึกปฏิบัติ</h2>
+  </div>
+  <p class="block-desc">เลือกเปิดใบงานเพื่อฝึกทำแบบฝึกหัดตามหัวข้อที่เรียนไปในแต่ละส่วน</p>
+  <div class="ws-grid">
+    <a class="ws-card" href="worksheet1.html">
+      <div class="ws-top"><span class="ws-num">ใบงานที่ 1</span><span class="ws-file">worksheet1.py</span></div>
+      <p class="ws-title">รู้จักภาษา Python และการแสดงผล</p>
+      <p class="ws-desc">ฝึก print(), input() และความหมายพื้นฐานของ Python</p>
+      <span class="ws-open">เปิดใบงาน →</span>
+    </a>
+    <a class="ws-card" href="worksheet2.html">
+      <div class="ws-top"><span class="ws-num">ใบงานที่ 2</span><span class="ws-file">worksheet2.py</span></div>
+      <p class="ws-title">การตัดสินใจด้วยเงื่อนไข</p>
+      <p class="ws-desc">ฝึกตัวดำเนินการเปรียบเทียบ และคำสั่ง if-elif-else</p>
+      <span class="ws-open">เปิดใบงาน →</span>
+    </a>
+    <a class="ws-card" href="worksheet3.html">
+      <div class="ws-top"><span class="ws-num">ใบงานที่ 3</span><span class="ws-file">worksheet3.py</span></div>
+      <p class="ws-title">ตัวแปร ชนิดข้อมูล และการคำนวณ</p>
+      <p class="ws-desc">ฝึกสร้างตัวแปร ระบุชนิดข้อมูล และคำนวณทางคณิตศาสตร์</p>
+      <span class="ws-open">เปิดใบงาน →</span>
+    </a>
+    <a class="ws-card" href="worksheet4.html">
+      <div class="ws-top"><span class="ws-num">ใบงานที่ 4</span><span class="ws-file">worksheet4.py</span></div>
+      <p class="ws-title">การวนซ้ำและโครงสร้างข้อมูล</p>
+      <p class="ws-desc">ฝึก for, while loop และการใช้งาน List, Dictionary</p>
+      <span class="ws-open">เปิดใบงาน →</span>
+    </a>
+    <a class="ws-card" href="worksheet5.html">
+      <div class="ws-top"><span class="ws-num">ใบงานที่ 5</span><span class="ws-file">worksheet5.py</span></div>
+      <p class="ws-title">ฟังก์ชันและการประยุกต์ใช้</p>
+      <p class="ws-desc">ฝึกเขียนฟังก์ชัน และนำความรู้ทั้งหมดมาประยุกต์ใช้แก้โจทย์</p>
+      <span class="ws-open">เปิดใบงาน →</span>
+    </a>
+    <a class="ws-card" href="quiz.html" style="border-color:var(--coral); background:linear-gradient(180deg,#fff,#fff5f4);">
+      <div class="ws-top"><span class="ws-num" style="color:var(--coral);">แบบทดสอบท้ายบท</span><span class="ws-file">quiz.py</span></div>
+      <p class="ws-title">📝 แบบทดสอบความรู้ Python</p>
+      <p class="ws-desc">ปรนัย 10 ข้อ + เติมคำ 5 ข้อ รวม 10 คะแนน — ทำได้ครั้งเดียวเท่านั้น</p>
+      <span class="ws-open" style="color:var(--coral);">เริ่มทำแบบทดสอบ →</span>
+    </a>
+  </div>
+</section>
+
+</main>
+
+<footer>&lt;/&gt; สรุปความรู้ภาษา Python สำหรับนักเรียนชั้น ม.ต้น — สนุกกับการเขียนโค้ดนะ 🐍</footer>
+
+<script>
+// fill gutter with line numbers
+const gutter = document.getElementById('gutter');
+if(gutter){
+  for(let i=1;i<=90;i++){
+    const d = document.createElement('div');
+    d.className='gutter-num';
+    d.style.padding='2px 8px 2px 0';
+    d.style.fontSize='10px';
+    d.textContent=i;
+    gutter.appendChild(d);
+  }
+}
+
+/* ---- auth: require login, show student badge, propagate sid to internal links ---- */
+const SHEET_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwU2rJcL17NlBXEUma2YBw141NRLK6nj3WvUxx2l2U0ovl146ovUXg9OOi4Ic442OsGHw/exec";
+
+function jsonp(url){
+  return new Promise(function(resolve, reject){
+    const cbName = 'jsonp_cb_' + Math.random().toString(36).slice(2);
+    const script = document.createElement('script');
+    window[cbName] = function(data){ resolve(data); delete window[cbName]; script.remove(); };
+    script.onerror = function(){ reject(new Error('jsonp failed')); delete window[cbName]; script.remove(); };
+    script.src = url + (url.indexOf('?') >= 0 ? '&' : '?') + 'callback=' + cbName;
+    document.body.appendChild(script);
+  });
+}
+
+function logout(){
+  localStorage.removeItem('studentId');
+  window.location.href = 'login.html';
+}
+
+function propagateSidLinks(sid){
+  document.querySelectorAll('a[href]').forEach(function(a){
+    const href = a.getAttribute('href');
+    if(!href || href.startsWith('http') || href.startsWith('#') || href.startsWith('mailto:')) return;
+    const sep = href.indexOf('?') >= 0 ? '&' : '?';
+    a.setAttribute('href', href + sep + 'sid=' + encodeURIComponent(sid));
+  });
+}
+
+async function initAuth(){
+  const params = new URLSearchParams(window.location.search);
+  let sid = params.get('sid');
+  if(!sid){ sid = localStorage.getItem('studentId'); }
+  if(!sid){ window.location.href = 'login.html'; return; }
+  localStorage.setItem('studentId', sid);
+  propagateSidLinks(sid);
+
+  const badge = document.getElementById('student-badge');
+  try{
+    const res = await jsonp(SHEET_WEBAPP_URL + '?action=load_roster&studentId=' + encodeURIComponent(sid));
+    if(res && res.found){
+      badge.innerHTML = '👤 ' + res.name + ' (' + (res.klass||'-') + ' เลขที่ ' + (res.number||'-') + ') &nbsp;·&nbsp; <a href="#" onclick="logout(); return false;">ออกจากระบบ</a>';
+    } else {
+      badge.innerHTML = '👤 รหัส ' + sid + ' &nbsp;·&nbsp; <a href="#" onclick="logout(); return false;">ออกจากระบบ</a>';
+    }
+  }catch(e){
+    badge.innerHTML = '👤 รหัส ' + sid;
+  }
+}
+document.addEventListener('DOMContentLoaded', initAuth);
+</script>
+</body>
+</html>

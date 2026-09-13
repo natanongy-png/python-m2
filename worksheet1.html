@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>รู้จักภาษา Python และการแสดงผล — ใบงานที่ 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@500;600;700&family=Sarabun:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+<style>
+:root{
+  --bg:#f2f8fd; --bg2:#e7f1fa; --panel:#ffffff; --panel-alt:#f3f8fc;
+  --border:#dbe8f3; --ink:#22303d; --text:#3a4c5c; --text-dim:#728296;
+  --blue:#2f7bc7; --blue-dim:#a9cdea; --yellow:#ffd43b; --coral:#ff6f61;
+  --green:#1fae72; --red:#e5484d; --purple:#8b5cf6; --pink:#ff6fa5;
+  --code-bg:#0d1620; --code-panel-alt:#1c2a39; --code-border:#2a3d52;
+  --code-text:#dce6f0; --code-text-dim:#8fa2b8;
+  --mono:'JetBrains Mono', monospace; --display:'Kanit', sans-serif; --body:'Sarabun', sans-serif;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:
+    radial-gradient(ellipse 700px 420px at 6% -5%, rgba(255,212,59,0.18), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 100% 0%, rgba(47,123,199,0.10), transparent 55%),
+    radial-gradient(ellipse 650px 420px at 55% 100%, rgba(255,111,165,0.10), transparent 55%),
+    var(--bg);
+  color:var(--text); font-family:var(--body); line-height:1.7;
+}
+a{color:inherit;}
+::selection{background:var(--yellow);color:#1c2530;}
+.topbar{position:sticky; top:0; z-index:10; background:rgba(242,248,253,.92); backdrop-filter:blur(10px); border-bottom:1px solid var(--border);}
+.tab-row{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 20px; flex-wrap:wrap;}
+.tab-left{display:flex; align-items:center; gap:10px;}
+.dots{display:flex; gap:6px;}
+.dot{width:11px; height:11px; border-radius:50%;}
+.dot.r{background:#ff5f57;} .dot.y{background:#febc2e;} .dot.g{background:#28c840;}
+.filename{font-family:var(--mono); font-size:13px; color:var(--text-dim); padding:4px 10px; background:var(--panel); border-radius:6px; border:1px solid var(--border);}
+.filename b{color:var(--blue); font-weight:700;}
+.tab-right{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+.back-link{font-family:var(--mono); font-size:12.5px; color:var(--blue); text-decoration:none; border:1px solid var(--border); padding:6px 12px; border-radius:20px; background:var(--panel); font-weight:500;}
+.back-link:hover{color:#fff; background:var(--blue); border-color:var(--blue);}
+.py-status{font-family:var(--mono); font-size:11.5px; color:var(--text-dim); padding:5px 10px; border:1px solid var(--border); border-radius:20px; background:var(--panel);}
+.student-badge{font-family:var(--mono); font-size:11.5px; color:var(--ink); padding:5px 12px; border-radius:20px; background:#eaf3fc; border:1px solid var(--blue-dim); display:flex; align-items:center; gap:8px;}
+.student-badge a{color:var(--coral); text-decoration:none; font-weight:700;}
+.student-badge a:hover{text-decoration:underline;}
+
+main{max-width:920px; margin:0 auto; padding:44px 20px 80px;}
+.eyebrow{font-family:var(--mono); font-size:13px; color:#189a63; font-weight:700;}
+.eyebrow::before{content:"›_ ";}
+h1.title{font-family:var(--display); font-weight:700; font-size:clamp(26px,4.2vw,36px); margin:12px 0 8px; color:var(--ink);}
+.subtitle{color:var(--text-dim); font-size:15px; max-width:680px;}
+
+.info-card{ margin-top:22px; background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:18px 20px; box-shadow:0 8px 24px -16px rgba(47,123,199,.25);}
+.meta-row{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;}
+.meta-badge{font-family:var(--mono); font-size:11.5px; color:var(--blue); background:#eaf3fc; border:1px solid var(--blue-dim); padding:4px 10px; border-radius:6px; font-weight:600;}
+.topics{list-style:none; padding:0; margin:0;}
+.topics li{position:relative; padding-left:20px; margin-bottom:6px; font-size:14px; color:var(--text);}
+.topics li::before{content:"▸"; position:absolute; left:0; color:var(--blue);}
+
+section.qsec{margin:44px 0; scroll-margin-top:80px;}
+.qsec-head{display:flex; align-items:center; gap:12px; margin-bottom:6px;}
+.qnum{font-family:var(--mono); font-weight:700; font-size:14px; color:#fff; background:var(--blue); width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex:0 0 auto; box-shadow:0 3px 8px -2px rgba(0,0,0,.25);}
+section.qsec:nth-of-type(5n+2) .qnum{background:var(--coral);}
+section.qsec:nth-of-type(5n+3) .qnum{background:var(--green);}
+section.qsec:nth-of-type(5n+4) .qnum{background:var(--purple);}
+section.qsec:nth-of-type(5n+5) .qnum{background:var(--pink);}
+.qsec-head h2{font-family:var(--display); font-weight:600; font-size:20px; margin:0; color:var(--ink);}
+.qsec-instruction{color:var(--text-dim); font-size:14px; margin:6px 0 18px;}
+
+.qa-card{background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:16px 18px; margin-bottom:12px; box-shadow:0 6px 18px -14px rgba(20,40,60,.3);}
+.qa-q{font-size:14.5px; margin:0 0 8px; color:var(--text);}
+.qa-q b{color:var(--blue); font-family:var(--mono); font-weight:700; margin-right:6px;}
+.qa-input{width:100%; background:var(--panel-alt); border:1px solid var(--border); border-radius:7px; color:var(--ink); font-family:var(--body); font-size:14px; padding:8px 10px;}
+.qa-input:focus{outline:2px solid var(--blue-dim); border-color:var(--blue);}
+.qa-input.small{width:auto; min-width:90px; display:inline-block;}
+textarea.qa-input{resize:vertical; min-height:38px;}
+
+.grid2{display:grid; grid-template-columns:1fr; gap:16px;}
+@media(min-width:760px){ .grid2{grid-template-columns:1fr 1fr;} }
+.grid3{display:grid; grid-template-columns:1fr; gap:14px;}
+@media(min-width:900px){ .grid3{grid-template-columns:1fr 1fr 1fr;} }
+
+table.tbl{width:100%; border-collapse:collapse; font-size:14px;}
+table.tbl th, table.tbl td{padding:9px 10px; text-align:left; border-bottom:1px solid var(--border);}
+table.tbl th{font-family:var(--mono); font-size:11px; color:var(--blue); text-transform:uppercase; letter-spacing:.05em; border-bottom:2px solid var(--blue-dim);}
+table.tbl td.mono{font-family:var(--mono);}
+table.tbl tr:last-child td{border-bottom:none;}
+
+.code-cell{background:var(--panel); border:1px solid var(--border); border-radius:12px; overflow:hidden; margin:12px 0; box-shadow:0 8px 22px -16px rgba(20,40,60,.35);}
+.cc-bar{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 12px; background:var(--panel-alt); border-bottom:1px solid var(--border); flex-wrap:wrap;}
+.cc-bar-left{display:flex; align-items:center; gap:8px;}
+.cc-label{font-family:var(--mono); font-size:11.5px; color:var(--text-dim);}
+.run-btn{font-family:var(--mono); font-size:12.5px; font-weight:700; color:#0f1720; background:var(--green); border:none; padding:6px 14px; border-radius:20px; cursor:pointer; display:flex; align-items:center; gap:6px;}
+.run-btn:hover{background:#3fcf94;}
+.run-btn:disabled{opacity:.5; cursor:wait;}
+.reset-btn{font-family:var(--mono); font-size:11.5px; color:var(--text-dim); background:transparent; border:1px solid var(--border); padding:5px 10px; border-radius:20px; cursor:pointer;}
+.reset-btn:hover{color:var(--blue); border-color:var(--blue-dim);}
+textarea.cc-code{
+  width:100%; display:block; background:var(--code-bg); color:var(--code-text); border:none; outline:none;
+  font-family:var(--mono); font-size:13.5px; line-height:1.6; padding:14px 16px; resize:vertical; min-height:90px;
+  tab-size:4;
+}
+.cc-output-wrap{border-top:1px solid var(--code-border); background:var(--code-bg);}
+.cc-output-label{font-family:var(--mono); font-size:10.5px; color:var(--code-text-dim); padding:6px 16px 0;}
+pre.cc-output{
+  margin:0; padding:10px 16px 14px; font-family:var(--mono); font-size:13px; color:#5eeaa8;
+  white-space:pre-wrap; word-break:break-word; min-height:20px;
+}
+pre.cc-output.err{color:#ff8a80;}
+pre.cc-output.idle{color:var(--code-text-dim);}
+
+.note{border-left:3px solid var(--yellow); background:#fff8e1; padding:11px 15px; border-radius:0 8px 8px 0; font-size:14px; color:var(--text); margin-top:10px;}
+.hint{font-size:12.5px; color:var(--text-dim); margin:4px 0 10px;}
+
+.scenario-card{background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:16px 18px; margin-bottom:16px; box-shadow:0 6px 18px -14px rgba(20,40,60,.3);}
+.scenario-head{display:flex; align-items:center; gap:10px; margin-bottom:6px;}
+.scenario-letter{font-family:var(--mono); font-weight:700; font-size:13px; color:#fff; background:var(--purple); width:24px; height:24px; border-radius:6px; display:flex; align-items:center; justify-content:center;}
+.scenario-title{font-family:var(--display); font-weight:600; font-size:16px; color:var(--ink); margin:0;}
+.scenario-desc{font-size:13.5px; color:var(--text-dim); margin:0 0 10px;}
+
+footer{text-align:center; padding:34px 20px 60px; color:var(--text-dim); font-size:13px; font-family:var(--mono);}
+.py-banner{
+  margin-top:18px; display:flex; align-items:center; gap:10px; font-family:var(--mono); font-size:12.5px;
+  color:var(--blue); background:#eaf3fc; border:1px solid var(--blue-dim); padding:9px 14px; border-radius:8px;
+}
+
+.fab-save{position:fixed; right:16px; bottom:16px; z-index:30; display:flex; flex-direction:column; align-items:flex-end; gap:8px;}
+.fab-btn{
+  font-family:var(--display); font-weight:700; font-size:14.5px; color:#fff; background:var(--green);
+  border:none; padding:14px 22px; border-radius:30px; cursor:pointer;
+  box-shadow:0 12px 26px -8px rgba(31,174,114,.55); display:flex; align-items:center; gap:8px;
+}
+.fab-btn:hover{background:#189a63;}
+.fab-btn:disabled{opacity:.6; cursor:wait;}
+.submit-status{
+  font-family:var(--mono); font-size:12px; background:#fff; padding:7px 13px; border-radius:8px;
+  border:1px solid var(--border); box-shadow:0 8px 20px -12px rgba(0,0,0,.35); max-width:260px; text-align:right;
+  display:none;
+}
+.submit-status.show{display:block;}
+.submit-status.ok{color:var(--green); border-color:var(--green);}
+.submit-status.err{color:var(--red); border-color:var(--red);}
+@media(max-width:600px){
+  .fab-btn{font-size:13px; padding:12px 18px;}
+  .submit-status{max-width:200px; font-size:11px;}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="tab-row">
+    <div class="tab-left">
+      <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <div class="filename">📄 <b>worksheet1</b>.py</div>
+    </div>
+    <div class="tab-right">
+      <span class="py-status">⏳ ยังไม่โหลด Python</span>
+      <span class="student-badge" id="student-badge">👤 กำลังตรวจสอบ...</span>
+      <a class="back-link" href="index.html">← กลับหน้าสรุปความรู้</a>
+    </div>
+  </div>
+</div>
+<main>
+  <div class="eyebrow">ใบงานที่ 1 / 5</div>
+  <h1 class="title">รู้จักภาษา Python และการแสดงผล</h1>
+  <p class="subtitle">ฝึกทำความเข้าใจว่า Python คืออะไร และฝึกใช้คำสั่งแสดงผล / รับข้อมูลเบื้องต้น</p>
+  <div class="info-card">
+    <div class="meta-row"><span class="meta-badge">ใบงานที่ 1</span><span class="meta-badge">print() / input()</span><span class="meta-badge">รันโค้ดได้จริงในเบราว์เซอร์</span></div>
+    <p class="hint" style="margin-top:0; text-transform:uppercase; letter-spacing:.05em; font-family:var(--mono);">จุดประสงค์การเรียนรู้</p>
+    <ul class="topics"><li>บอกความหมายและจุดเด่นของภาษา Python ได้</li><li>ใช้คำสั่ง print() แสดงผลข้อความและตัวเลขได้</li><li>ใช้คำสั่ง input() รับข้อมูลจากผู้ใช้ได้</li><li>เขียนโปรแกรมแนะนำตัวเองอย่างง่ายได้</li></ul>
+  </div>
+  <div class="py-banner">🐍 ทุกกล่องโค้ดแก้ไขและกด <b style="color:var(--coral);">▶ รันโค้ด</b> เพื่อดูผลลัพธ์จริงได้ทันที ระบบบันทึกความคืบหน้าให้อัตโนมัติ เมื่อทำครบแล้วกดปุ่ม <b style="color:var(--green);">✅ บันทึกคำตอบ</b> มุมขวาล่างของหน้าจอ</div>
+
+<section class="qsec" id="sec1"><div class="qsec-head"><span class="qnum">1</span><h2>ตอบคำถามเกี่ยวกับ Python</h2></div>
+<div class="qa-card"><p class="qa-q"><b>1.</b>Python คือภาษาอะไร?</p><textarea class="qa-input" rows="2" placeholder="พิมพ์คำตอบที่นี่..."></textarea></div>
+<div class="qa-card"><p class="qa-q"><b>2.</b>จุดเด่นของภาษา Python มีอะไรบ้าง? (อย่างน้อย 2 ข้อ)</p><input class="qa-input" type="text" placeholder="ตอบ 1) ..." style="margin-bottom:8px;"><input class="qa-input" type="text" placeholder="ตอบ 2) ..."></div>
+<div class="qa-card"><p class="qa-q"><b>3.</b>เราสามารถใช้ Python ทำอะไรได้บ้าง? (ยกตัวอย่าง 2 อย่าง)</p><input class="qa-input" type="text" placeholder="ตอบ 1) ..." style="margin-bottom:8px;"><input class="qa-input" type="text" placeholder="ตอบ 2) ..."></div>
+</section>
+<section class="qsec" id="sec2"><div class="qsec-head"><span class="qnum">2</span><h2>ทำนายผลลัพธ์ของโปรแกรม</h2></div>
+<p class="qsec-instruction">เขียนคำทำนายผลลัพธ์ในช่องก่อน แล้วกด ▶ รันโค้ด เพื่อตรวจคำตอบของตัวเอง</p>
+<div class="qa-card"><p class="qa-q"><b>1.</b>ทำนายผลลัพธ์ของโปรแกรมต่อไปนี้</p>
+<input class="qa-input" type="text" placeholder="ผลลัพธ์ที่ทำนาย..." style="margin-bottom:10px;">
+
+<div class="code-cell">
+  <div class="cc-bar">
+    <div class="cc-bar-left"><span class="cc-label">🐍 โค้ดข้อ 1</span></div>
+    <div class="cc-bar-left">
+      <button class="reset-btn" onclick="resetCell(1, `print(&quot;Hello, Python!&quot;)
+print(123)
+print(3.14)`)">↺ รีเซ็ต</button>
+      <button class="run-btn" id="btn-1" onclick="runCell(1)">▶ รันโค้ด</button>
+    </div>
+  </div>
+  <textarea class="cc-code" id="code-1" spellcheck="false">print("Hello, Python!")
+print(123)
+print(3.14)</textarea>
+  <div class="cc-output-wrap">
+    <div class="cc-output-label">ผลลัพธ์ (Output)</div>
+    <pre class="cc-output idle" id="out-1">ผลลัพธ์จะแสดงที่นี่หลังกดรัน</pre>
+  </div>
+</div>
+</div>
+<div class="qa-card"><p class="qa-q"><b>2.</b>ทำนายผลลัพธ์ของโปรแกรมต่อไปนี้</p>
+<input class="qa-input" type="text" placeholder="ผลลัพธ์ที่ทำนาย..." style="margin-bottom:10px;">
+
+<div class="code-cell">
+  <div class="cc-bar">
+    <div class="cc-bar-left"><span class="cc-label">🐍 โค้ดข้อ 2</span></div>
+    <div class="cc-bar-left">
+      <button class="reset-btn" onclick="resetCell(2, `print(&quot;สวัสดีครับ&quot;)
+print(2 + 3)
+print(10 / 2)`)">↺ รีเซ็ต</button>
+      <button class="run-btn" id="btn-2" onclick="runCell(2)">▶ รันโค้ด</button>
+    </div>
+  </div>
+  <textarea class="cc-code" id="code-2" spellcheck="false">print("สวัสดีครับ")
+print(2 + 3)
+print(10 / 2)</textarea>
+  <div class="cc-output-wrap">
+    <div class="cc-output-label">ผลลัพธ์ (Output)</div>
+    <pre class="cc-output idle" id="out-2">ผลลัพธ์จะแสดงที่นี่หลังกดรัน</pre>
+  </div>
+</div>
+</div>
+<div class="qa-card"><p class="qa-q"><b>3.</b>ทำนายผลลัพธ์ของโปรแกรมต่อไปนี้</p>
+<input class="qa-input" type="text" placeholder="ผลลัพธ์ที่ทำนาย..." style="margin-bottom:10px;">
+
+<div class="code-cell">
+  <div class="cc-bar">
+    <div class="cc-bar-left"><span class="cc-label">🐍 โค้ดข้อ 3</span></div>
+    <div class="cc-bar-left">
+      <button class="reset-btn" onclick="resetCell(3, `print(&quot;A&quot; * 5)
+print(&quot;Python&quot;[0])
+print(len(&quot;code&quot;))`)">↺ รีเซ็ต</button>
+      <button class="run-btn" id="btn-3" onclick="runCell(3)">▶ รันโค้ด</button>
+    </div>
+  </div>
+  <textarea class="cc-code" id="code-3" spellcheck="false">print("A" * 5)
+print("Python"[0])
+print(len("code"))</textarea>
+  <div class="cc-output-wrap">
+    <div class="cc-output-label">ผลลัพธ์ (Output)</div>
+    <pre class="cc-output idle" id="out-3">ผลลัพธ์จะแสดงที่นี่หลังกดรัน</pre>
+  </div>
+</div>
+</div>
+<div class="qa-card"><p class="qa-q"><b>4.</b>ทำนายผลลัพธ์ของโปรแกรมต่อไปนี้</p>
+<input class="qa-input" type="text" placeholder="ผลลัพธ์ที่ทำนาย..." style="margin-bottom:10px;">
+
+<div class="code-cell">
+  <div class="cc-bar">
+    <div class="cc-bar-left"><span class="cc-label">🐍 โค้ดข้อ 4</span></div>
+    <div class="cc-bar-left">
+      <button class="reset-btn" onclick="resetCell(4, `print(5 > 3)
+print(5 == 5)
+print(5 < 2)`)">↺ รีเซ็ต</button>
+      <button class="run-btn" id="btn-4" onclick="runCell(4)">▶ รันโค้ด</button>
+    </div>
+  </div>
+  <textarea class="cc-code" id="code-4" spellcheck="false">print(5 &gt; 3)
+print(5 == 5)
+print(5 &lt; 2)</textarea>
+  <div class="cc-output-wrap">
+    <div class="cc-output-label">ผลลัพธ์ (Output)</div>
+    <pre class="cc-output idle" id="out-4">ผลลัพธ์จะแสดงที่นี่หลังกดรัน</pre>
+  </div>
+</div>
+</div>
+</section>
+<section class="qsec" id="sec3"><div class="qsec-head"><span class="qnum">3</span><h2>เติมคำสั่ง print() ให้ถูกต้อง</h2></div>
+<p class="qsec-instruction">แก้ไขส่วนที่เป็น ___ ในกล่องโค้ดให้ถูกต้องตามโจทย์ แล้วกด ▶ รันโค้ด เพื่อตรวจสอบ</p>
+<div class="qa-card"><p class="qa-q"><b>1.</b>แสดงข้อความว่า สวัสดี Python</p>
+
+<div class="code-cell">
+  <div class="cc-bar">
+    <div class="cc-bar-left"><span class="cc-label">🐍 เติมโค้ดข้อ 1</span></div>
+    <div class="cc-bar-left">
+      <button class="reset-btn" onclick="resetCell(5, `print(&quot;___&quot;)`)">↺ รีเซ็ต</button>
+      <button class="run-btn" id="btn-5" onclick="runCell(5)">▶ รันโค้ด</button>
+    </div>
+  </div>
+  <textarea class="cc-code" id="code-5" spellcheck="false">print("___")</textarea>
+  <div class="cc-output-wrap">
+    <div class="cc-output-label">ผลลัพธ์ (Output)</div>
+    <pre class="cc-output idle" id="out-5">ผลลัพธ์จะแสดงที่นี่หลังกดรัน</pre>
+  </div>
+</div>
+</div>
+<div class="qa-card"><p class="qa-q"><b>2.</b>แสดงผลลัพธ์ของ 7 + 8</p>
+
+<div class="code-cell">
+  <div class="cc-bar">
+    <div class="cc-bar-left"><span class="cc-label">🐍 เติมโค้ดข้อ 2</span></div>
+    <div class="cc-bar-left">
+      <button class="reset-btn" onclick="resetCell(6, `print(___)`)">↺ รีเซ็ต</button>
+      <button class="run-btn" id="btn-6" onclick="runCell(6)">▶ รันโค้ด</button>
+    </div>
+  </div>
+  <textarea class="cc-code" id="code-6" spellcheck="false">print(___)</textarea>
+  <div class="cc-output-wrap">
+    <div class="cc-output-label">ผลลัพธ์ (Output)</div>
+    <pre class="cc-output idle" id="out-6">ผลลัพธ์จะแสดงที่นี่หลังกดรัน</pre>
+  </div>
+</div>
+</div>
+<div class="qa-card"><p class="qa-q"><b>3.</b>แสดงข้อความว่า วันนี้เป็นวันที่ดี</p>
+
+<div class="code-cell">
+  <div class="cc-bar">
+    <div class="cc-bar-left"><span class="cc-label">🐍 เติมโค้ดข้อ 3</span></div>
+    <div class="cc-bar-left">
+      <button class="reset-btn" onclick="resetCell(7, `print(&quot;___&quot;)`)">↺ รีเซ็ต</button>
+      <button class="run-btn" id="btn-7" onclick="runCell(7)">▶ รันโค้ด</button>
+    </div>
+  </div>
+  <textarea class="cc-code" id="code-7" spellcheck="false">print("___")</textarea>
+  <div class="cc-output-wrap">
+    <div class="cc-output-label">ผลลัพธ์ (Output)</div>
+    <pre class="cc-output idle" id="out-7">ผลลัพธ์จะแสดงที่นี่หลังกดรัน</pre>
+  </div>
+</div>
+</div>
+<div class="qa-card"><p class="qa-q"><b>4.</b>แสดงเลขจำนวนเต็ม 256</p>
+
+<div class="code-cell">
+  <div class="cc-bar">
+    <div class="cc-bar-left"><span class="cc-label">🐍 เติมโค้ดข้อ 4</span></div>
+    <div class="cc-bar-left">
+      <button class="reset-btn" onclick="resetCell(8, `print(___)`)">↺ รีเซ็ต</button>
+      <button class="run-btn" id="btn-8" onclick="runCell(8)">▶ รันโค้ด</button>
+    </div>
+  </div>
+  <textarea class="cc-code" id="code-8" spellcheck="false">print(___)</textarea>
+  <div class="cc-output-wrap">
+    <div class="cc-output-label">ผลลัพธ์ (Output)</div>
+    <pre class="cc-output idle" id="out-8">ผลลัพธ์จะแสดงที่นี่หลังกดรัน</pre>
+  </div>
+</div>
+</div>
+<div class="qa-card"><p class="qa-q"><b>5.</b>แสดงข้อความว่า "KEEP CODING!" 3 ครั้ง</p>
+
+<div class="code-cell">
+  <div class="cc-bar">
+    <div class="cc-bar-left"><span class="cc-label">🐍 เติมโค้ดข้อ 5</span></div>
+    <div class="cc-bar-left">
+      <button class="reset-btn" onclick="resetCell(9, `print(&quot;___&quot;)`)">↺ รีเซ็ต</button>
+      <button class="run-btn" id="btn-9" onclick="runCell(9)">▶ รันโค้ด</button>
+    </div>
+  </div>
+  <textarea class="cc-code" id="code-9" spellcheck="false">print("___")</textarea>
+  <div class="cc-output-wrap">
+    <div class="cc-output-label">ผลลัพธ์ (Output)</div>
+    <pre class="cc-output idle" id="out-9">ผลลัพธ์จะแสดงที่นี่หลังกดรัน</pre>
+  </div>
+</div>
+</div>
+</section>
+<section class="qsec" id="sec4"><div class="qsec-head"><span class="qnum">4</span><h2>เขียนโปรแกรมแนะนำตัวเอง</h2></div>
+<p class="qsec-instruction">ให้เขียนโปรแกรมรับข้อมูลจากผู้ใช้ 2 อย่าง คือ ชื่อ และ งานอดิเรก แล้วแสดงผลลัพธ์เป็นประโยคแนะนำตัวเอง</p>
+<div class="qa-card" style="background:transparent; border:none; padding:0 0 12px;"><p class="qa-q" style="margin:0;"><b>สิ่งที่ต้องทำ</b></p><ul class="topics"><li>รับชื่อจากผู้ใช้ (ใช้ input())</li><li>รับงานอดิเรกจากผู้ใช้ (ใช้ input())</li><li>แสดงผลเป็นประโยค เช่น "สวัสดีครับ/ค่ะ ฉันชื่อ ___ งานอดิเรกของฉันคือ ___"</li></ul></div>
+
+<div class="code-cell">
+  <div class="cc-bar">
+    <div class="cc-bar-left"><span class="cc-label">🐍 worksheet1_ex4.py</span></div>
+    <div class="cc-bar-left">
+      <button class="reset-btn" onclick="resetCell(10, `# เขียนโปรแกรมแนะนำตัวเองตรงนี้
+name = input(&quot;ชื่อของคุณ: &quot;)
+hobby = input(&quot;งานอดิเรกของคุณ: &quot;)
+
+# เติมคำสั่งแสดงผลด้านล่าง
+`)">↺ รีเซ็ต</button>
+      <button class="run-btn" id="btn-10" onclick="runCell(10)">▶ รันโค้ด</button>
+    </div>
+  </div>
+  <textarea class="cc-code" id="code-10" spellcheck="false" style="min-height:160px;"># เขียนโปรแกรมแนะนำตัวเองตรงนี้
+name = input("ชื่อของคุณ: ")
+hobby = input("งานอดิเรกของคุณ: ")
+
+# เติมคำสั่งแสดงผลด้านล่าง
+</textarea>
+  <div class="cc-output-wrap">
+    <div class="cc-output-label">ผลลัพธ์ (Output)</div>
+    <pre class="cc-output idle" id="out-10">ผลลัพธ์จะแสดงที่นี่หลังกดรัน</pre>
+  </div>
+</div>
+<div class="note">💡 เมื่อกด ▶ รันโค้ด จะมีหน้าต่างเล็กๆ เด้งขึ้นมาให้พิมพ์คำตอบสำหรับ input() แต่ละครั้ง</div>
+</section>
+
+</main>
+<footer>&lt;/&gt; ใบงานที่ 1 — วิชาเทคโนโลยี (การเขียนโปรแกรม) ม.2</footer>
+
+<div class="fab-save">
+  <div class="submit-status" id="submit-status"></div>
+  <button class="fab-btn" id="submit-btn" onclick="submitToSheet()">✅ ทำเสร็จแล้ว บันทึกคำตอบ</button>
+</div>
+
+<script>
+let pyodideReadyPromise = null;
+function setStatus(msg){
+  document.querySelectorAll('.py-status').forEach(function(e){ e.textContent = msg; });
+}
+async function getPyodide(){
+  if(!pyodideReadyPromise){
+    setStatus('⏳ กำลังโหลด Python ครั้งแรก (รอสักครู่)...');
+    pyodideReadyPromise = loadPyodide({indexURL:"https://cdn.jsdelivr.net/pyodide/v0.26.4/full/"}).then(async function(pyodide){
+      pyodide.globals.set("_js_prompt", function(msg){ return window.prompt(msg===undefined?"":String(msg)) || ""; });
+      await pyodide.runPythonAsync(
+        "import builtins\n" +
+        "def _custom_input(prompt=''):\n" +
+        "    return _js_prompt(str(prompt))\n" +
+        "builtins.input = _custom_input\n"
+      );
+      setStatus('✅ Python พร้อมใช้งานแล้ว');
+      return pyodide;
+    }).catch(function(err){
+      setStatus('❌ โหลด Python ไม่สำเร็จ ตรวจสอบอินเทอร์เน็ต');
+      throw err;
+    });
+  }
+  return pyodideReadyPromise;
+}
+async function runCell(id){
+  const ta = document.getElementById('code-'+id);
+  const out = document.getElementById('out-'+id);
+  const btn = document.getElementById('btn-'+id);
+  out.textContent = '⏳ กำลังรัน...';
+  out.classList.remove('err'); out.classList.add('idle');
+  btn.disabled = true;
+  try{
+    const pyodide = await getPyodide();
+    await pyodide.runPythonAsync("import sys, io\nsys.stdout = io.StringIO()\nsys.stderr = sys.stdout\n");
+    await pyodide.runPythonAsync(ta.value);
+    const result = pyodide.runPython("sys.stdout.getvalue()");
+    out.classList.remove('idle');
+    out.textContent = result && result.length ? result : '(ไม่มีข้อความแสดงผล — ลองใช้ print())';
+  }catch(err){
+    out.classList.remove('idle');
+    out.classList.add('err');
+    out.textContent = '❌ เกิดข้อผิดพลาด:\n' + err.message;
+  }
+  btn.disabled = false;
+}
+function resetCell(id, original){
+  document.getElementById('code-'+id).value = original;
+  const out = document.getElementById('out-'+id);
+  out.textContent = 'ผลลัพธ์จะแสดงที่นี่หลังกดรัน';
+  out.classList.remove('err'); out.classList.add('idle');
+}
+
+/* =========================================================
+   ระบบล็อกอิน + บันทึกความคืบหน้าอัตโนมัติ + ส่งคำตอบ
+   ========================================================= */
+const SHEET_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwU2rJcL17NlBXEUma2YBw141NRLK6nj3WvUxx2l2U0ovl146ovUXg9OOi4Ic442OsGHw/exec";
+const WORKSHEET_ID = "รู้จักภาษา Python และการแสดงผล — ใบงานที่ 1";
+let CURRENT_STUDENT = null; // {id, name, klass, number}
+
+function jsonp(url){
+  return new Promise(function(resolve, reject){
+    const cbName = 'jsonp_cb_' + Math.random().toString(36).slice(2);
+    const script = document.createElement('script');
+    window[cbName] = function(data){
+      resolve(data);
+      delete window[cbName];
+      script.remove();
+    };
+    script.onerror = function(){
+      reject(new Error('jsonp failed'));
+      delete window[cbName];
+      script.remove();
+    };
+    script.src = url + (url.indexOf('?') >= 0 ? '&' : '?') + 'callback=' + cbName;
+    document.body.appendChild(script);
+  });
+}
+
+function getSid(){
+  const params = new URLSearchParams(window.location.search);
+  let sid = params.get('sid');
+  if(!sid){ sid = localStorage.getItem('studentId'); }
+  return sid;
+}
+
+function goLogin(){
+  window.location.href = 'login.html';
+}
+
+function propagateSidLinks(sid){
+  document.querySelectorAll('a[href]').forEach(function(a){
+    const href = a.getAttribute('href');
+    if(!href || href.startsWith('http') || href.startsWith('#') || href.startsWith('mailto:')) return;
+    const sep = href.indexOf('?') >= 0 ? '&' : '?';
+    a.setAttribute('href', href + sep + 'sid=' + encodeURIComponent(sid));
+  });
+}
+
+function renderStudentBadge(sid, info){
+  const el = document.getElementById('student-badge');
+  if(!el) return;
+  if(info && info.name){
+    el.innerHTML = '👤 ' + info.name + ' (' + (info.klass||'-') + ' เลขที่ ' + (info.number||'-') + ') &nbsp;·&nbsp; <a href="#" onclick="logout(); return false;">ออกจากระบบ</a>';
+  } else {
+    el.innerHTML = '👤 รหัส ' + sid + ' &nbsp;·&nbsp; <a href="#" onclick="logout(); return false;">ออกจากระบบ</a>';
+  }
+}
+
+function logout(){
+  localStorage.removeItem('studentId');
+  window.location.href = 'login.html';
+}
+
+function serializeProgress(){
+  const qa = Array.from(document.querySelectorAll('.qa-input')).map(function(el){ return el.value; });
+  const code = Array.from(document.querySelectorAll('textarea.cc-code')).map(function(el){ return el.value; });
+  return JSON.stringify({ qa: qa, code: code });
+}
+
+function applyProgress(dataStr){
+  if(!dataStr) return;
+  try{
+    const obj = JSON.parse(dataStr);
+    const qaEls = document.querySelectorAll('.qa-input');
+    const codeEls = document.querySelectorAll('textarea.cc-code');
+    (obj.qa || []).forEach(function(v, i){ if(qaEls[i] && v){ qaEls[i].value = v; } });
+    (obj.code || []).forEach(function(v, i){ if(codeEls[i] && v){ codeEls[i].value = v; } });
+  }catch(e){}
+}
+
+function saveProgress(useKeepalive){
+  if(!CURRENT_STUDENT || !SHEET_WEBAPP_URL) return;
+  const payload = {
+    action: 'save_progress',
+    studentId: CURRENT_STUDENT.id,
+    worksheet: WORKSHEET_ID,
+    dataJSON: serializeProgress()
+  };
+  try{
+    fetch(SHEET_WEBAPP_URL, {
+      method: 'POST', mode: 'no-cors', headers: {'Content-Type':'text/plain'},
+      body: JSON.stringify(payload),
+      keepalive: !!useKeepalive
+    });
+  }catch(e){}
+}
+
+async function initAuthAndRestore(){
+  const sid = getSid();
+  if(!sid){ goLogin(); return; }
+  localStorage.setItem('studentId', sid);
+  propagateSidLinks(sid);
+
+  let info = null;
+  try{
+    const res = await jsonp(SHEET_WEBAPP_URL + '?action=load_roster&studentId=' + encodeURIComponent(sid));
+    if(res && res.found){ info = { id: sid, name: res.name, klass: res.klass, number: res.number }; }
+  }catch(e){}
+  if(!info){ info = { id: sid, name: null, klass: null, number: null }; }
+  CURRENT_STUDENT = info;
+  renderStudentBadge(sid, info);
+
+  if(WORKSHEET_ID){
+    try{
+      const prog = await jsonp(SHEET_WEBAPP_URL + '?action=load_progress&studentId=' + encodeURIComponent(sid) + '&worksheet=' + encodeURIComponent(WORKSHEET_ID));
+      if(prog && prog.found){ applyProgress(prog.data); }
+    }catch(e){}
+    setInterval(function(){ saveProgress(false); }, 45000);
+    window.addEventListener('pagehide', function(){ saveProgress(true); });
+  }
+}
+document.addEventListener('DOMContentLoaded', initAuthAndRestore);
+
+function collectAnswers(){
+  const parts = [];
+  document.querySelectorAll('.qa-card').forEach(function(card){
+    const qEl = card.querySelector('.qa-q');
+    let q = qEl ? qEl.innerText.trim() : '';
+    if(!q){
+      q = Array.from(card.querySelectorAll('span,b')).map(function(e){return e.innerText.trim();}).filter(function(t){return t;}).join(' ');
+    }
+    const fields = card.querySelectorAll('.qa-input');
+    const vals = Array.from(fields).map(function(f){return f.value.trim();}).filter(function(v){return v.length;});
+    if(q){
+      parts.push(q + (vals.length ? '\n➜ ' + vals.join(' | ') : '\n➜ (ยังไม่ตอบ)'));
+    }
+  });
+  document.querySelectorAll('table.tbl').forEach(function(tbl){
+    const rows = tbl.querySelectorAll('tr');
+    rows.forEach(function(row){
+      const inputs = row.querySelectorAll('input.qa-input, textarea.qa-input');
+      if(inputs.length){
+        const cells = Array.from(row.querySelectorAll('td')).slice(0,2).map(function(td){return td.innerText.trim();}).filter(function(t){return t;});
+        const label = cells.length ? cells.join(' - ') : 'แถวตาราง';
+        const vals = Array.from(inputs).map(function(f){return f.value.trim();}).filter(function(v){return v.length;});
+        parts.push(label + (vals.length ? '\n➜ ' + vals.join(' | ') : '\n➜ (ยังไม่ตอบ)'));
+      }
+    });
+  });
+  document.querySelectorAll('.code-cell').forEach(function(cell){
+    const labelEl = cell.querySelector('.cc-label');
+    const label = labelEl ? labelEl.innerText.trim() : 'โค้ด';
+    const code = cell.querySelector('textarea.cc-code');
+    parts.push('[โค้ด] ' + label + '\n' + (code ? code.value : ''));
+  });
+  return parts.join('\n\n');
+}
+
+async function submitToSheet(){
+  const btn = document.getElementById('submit-btn');
+  const status = document.getElementById('submit-status');
+  status.classList.add('show');
+  status.classList.remove('ok','err');
+
+  if(!CURRENT_STUDENT){
+    status.textContent = '⚠️ ยังไม่พร้อมใช้งาน กรุณารอสักครู่แล้วลองใหม่';
+    status.classList.add('err');
+    return;
+  }
+  if(!SHEET_WEBAPP_URL){
+    status.textContent = '⚠️ ครูยังไม่ได้ตั้งค่าปลายทางบันทึกข้อมูล';
+    status.classList.add('err');
+    return;
+  }
+
+  btn.disabled = true;
+  status.textContent = '⏳ กำลังบันทึกคำตอบ...';
+
+  saveProgress(false);
+
+  const payload = {
+    action: 'submit_worksheet',
+    studentId: CURRENT_STUDENT.id,
+    worksheet: WORKSHEET_ID,
+    name: CURRENT_STUDENT.name || '',
+    klass: CURRENT_STUDENT.klass || '',
+    number: CURRENT_STUDENT.number || '',
+    answersText: collectAnswers()
+  };
+
+  try{
+    await fetch(SHEET_WEBAPP_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type': 'text/plain'},
+      body: JSON.stringify(payload)
+    });
+    status.textContent = '✅ บันทึกคำตอบเรียบร้อยแล้ว!';
+    status.classList.add('ok');
+  }catch(err){
+    status.textContent = '❌ บันทึกไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่';
+    status.classList.add('err');
+  }
+  btn.disabled = false;
+}
+</script>
+</body>
+</html>

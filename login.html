@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เข้าสู่ระบบ — เว็บเรียนรู้ Python ม.2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@500;600;700&family=Sarabun:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f2f8fd; --panel:#ffffff; --border:#dbe8f3; --ink:#22303d; --text:#3a4c5c; --text-dim:#728296;
+  --blue:#2f7bc7; --blue-dim:#a9cdea; --yellow:#ffd43b; --green:#1fae72; --red:#e5484d;
+  --mono:'JetBrains Mono', monospace; --display:'Kanit', sans-serif; --body:'Sarabun', sans-serif;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+  background:
+    radial-gradient(ellipse 700px 420px at 6% -5%, rgba(255,212,59,0.18), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 100% 0%, rgba(47,123,199,0.10), transparent 55%),
+    radial-gradient(ellipse 650px 420px at 55% 100%, rgba(255,111,165,0.10), transparent 55%),
+    var(--bg);
+  color:var(--text); font-family:var(--body); padding:20px;
+}
+.card{
+  width:100%; max-width:400px; background:var(--panel); border:1px solid var(--border); border-radius:16px;
+  padding:34px 30px; box-shadow:0 20px 50px -20px rgba(20,60,100,.35);
+}
+.logo{font-size:44px; text-align:center; margin-bottom:6px;}
+h1{font-family:var(--display); font-weight:700; font-size:22px; text-align:center; margin:0 0 6px; color:var(--ink);}
+p.sub{text-align:center; color:var(--text-dim); font-size:14px; margin:0 0 26px;}
+label{font-family:var(--mono); font-size:12.5px; color:var(--text-dim); display:block; margin-bottom:6px;}
+input{
+  width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:10px; background:#f7fbfd;
+  color:var(--ink); font-family:var(--mono); font-size:20px; letter-spacing:4px; text-align:center;
+  margin-bottom:16px;
+}
+input#sid{ letter-spacing:8px; }
+input:focus{outline:2px solid var(--blue-dim); border-color:var(--blue);}
+.reg-field input{font-family:var(--body); font-size:15px; letter-spacing:normal; text-align:left;}
+button{
+  width:100%; padding:13px; border:none; border-radius:30px; background:var(--blue); color:#fff;
+  font-family:var(--display); font-weight:700; font-size:15px; cursor:pointer;
+}
+button:hover{background:#2568ab;}
+button:disabled{opacity:.6; cursor:wait;}
+.msg{font-family:var(--mono); font-size:12.5px; text-align:center; margin-top:14px; min-height:18px;}
+.msg.err{color:var(--red);}
+.msg.ok{color:var(--green);}
+#reg-box{display:none; margin-top:6px; padding-top:16px; border-top:1px dashed var(--border);}
+#reg-box p{font-size:13px; color:var(--text-dim); margin:0 0 14px;}
+footer{text-align:center; margin-top:20px; font-family:var(--mono); font-size:11.5px; color:var(--text-dim);}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">🐍</div>
+  <h1>เข้าสู่ระบบ</h1>
+  <p class="sub">พิมพ์เลขประจำตัวนักเรียน 5 หลัก</p>
+
+  <form id="login-form" onsubmit="return handleLogin(event)">
+    <label for="sid">เลขประจำตัวนักเรียน (5 หลัก)</label>
+    <input id="sid" type="text" inputmode="numeric" maxlength="5" pattern="[0-9]{5}" placeholder="00000" required>
+    <button id="login-btn" type="submit">เข้าสู่ระบบ →</button>
+  </form>
+
+  <div id="reg-box" style="display:none;">
+    <p id="not-found-msg">❌ ไม่พบเลขประจำตัวนี้ในระบบ กรุณาตรวจสอบกับครูผู้สอน</p>
+  </div>
+
+  <p class="msg" id="msg"></p>
+</div>
+<footer>เว็บเรียนรู้ภาษา Python — ม.2</footer>
+
+<script>
+const SHEET_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwU2rJcL17NlBXEUma2YBw141NRLK6nj3WvUxx2l2U0ovl146ovUXg9OOi4Ic442OsGHw/exec";
+
+function jsonp(url){
+  return new Promise(function(resolve, reject){
+    const cbName = 'jsonp_cb_' + Math.random().toString(36).slice(2);
+    const script = document.createElement('script');
+    window[cbName] = function(data){ resolve(data); delete window[cbName]; script.remove(); };
+    script.onerror = function(){ reject(new Error('jsonp failed')); delete window[cbName]; script.remove(); };
+    script.src = url + (url.indexOf('?') >= 0 ? '&' : '?') + 'callback=' + cbName;
+    document.body.appendChild(script);
+  });
+}
+
+// auto-login if already remembered on this device
+window.addEventListener('DOMContentLoaded', function(){
+  const saved = localStorage.getItem('studentId');
+  if(saved){ document.getElementById('sid').value = saved; }
+});
+
+async function handleLogin(ev){
+  ev.preventDefault();
+  const sid = document.getElementById('sid').value.trim();
+  const msg = document.getElementById('msg');
+  const btn = document.getElementById('login-btn');
+  if(!/^[0-9]{5}$/.test(sid)){
+    msg.textContent = '⚠️ กรุณากรอกเลขประจำตัว 5 หลัก';
+    msg.className = 'msg err';
+    return false;
+  }
+  btn.disabled = true;
+  msg.textContent = '⏳ กำลังตรวจสอบ...';
+  msg.className = 'msg';
+  document.getElementById('reg-box').style.display = 'none';
+  try{
+    const res = await jsonp(SHEET_WEBAPP_URL + '?action=load_roster&studentId=' + encodeURIComponent(sid));
+    if(res && res.found){
+      localStorage.setItem('studentId', sid);
+      msg.textContent = '✅ ยินดีต้อนรับกลับมา ' + res.name + '!';
+      msg.className = 'msg ok';
+      setTimeout(function(){ window.location.href = 'index.html?sid=' + encodeURIComponent(sid); }, 500);
+    } else {
+      document.getElementById('reg-box').style.display = 'block';
+      msg.textContent = '';
+    }
+  }catch(e){
+    msg.textContent = '❌ เชื่อมต่อไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่';
+    msg.className = 'msg err';
+  }
+  btn.disabled = false;
+  return false;
+}
+</script>
+</body>
+</html>

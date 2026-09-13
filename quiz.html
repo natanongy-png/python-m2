@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>แบบทดสอบท้ายบท — Python ม.2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@500;600;700&family=Sarabun:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f2f8fd; --bg2:#e7f1fa; --panel:#ffffff; --panel-alt:#f3f8fc;
+  --border:#dbe8f3; --ink:#22303d; --text:#3a4c5c; --text-dim:#728296;
+  --blue:#2f7bc7; --blue-dim:#a9cdea; --yellow:#ffd43b; --coral:#ff6f61;
+  --green:#1fae72; --red:#e5484d; --purple:#8b5cf6; --pink:#ff6fa5;
+  --code-bg:#0d1620; --code-text:#dce6f0;
+  --mono:'JetBrains Mono', monospace; --display:'Kanit', sans-serif; --body:'Sarabun', sans-serif;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:
+    radial-gradient(ellipse 700px 420px at 6% -5%, rgba(255,212,59,0.18), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 100% 0%, rgba(47,123,199,0.10), transparent 55%),
+    radial-gradient(ellipse 650px 420px at 55% 100%, rgba(255,111,165,0.10), transparent 55%),
+    var(--bg);
+  color:var(--text); font-family:var(--body); line-height:1.7;
+}
+a{color:inherit;}
+.topbar{position:sticky; top:0; z-index:10; background:rgba(242,248,253,.92); backdrop-filter:blur(10px); border-bottom:1px solid var(--border);}
+.tab-row{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 20px; flex-wrap:wrap;}
+.tab-left{display:flex; align-items:center; gap:10px;}
+.dots{display:flex; gap:6px;}
+.dot{width:11px; height:11px; border-radius:50%;}
+.dot.r{background:#ff5f57;} .dot.y{background:#febc2e;} .dot.g{background:#28c840;}
+.filename{font-family:var(--mono); font-size:13px; color:var(--text-dim); padding:4px 10px; background:var(--panel); border-radius:6px; border:1px solid var(--border);}
+.filename b{color:var(--blue); font-weight:700;}
+.tab-right{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+.back-link{font-family:var(--mono); font-size:12.5px; color:var(--blue); text-decoration:none; border:1px solid var(--border); padding:6px 12px; border-radius:20px; background:var(--panel); font-weight:500;}
+.back-link:hover{color:#fff; background:var(--blue); border-color:var(--blue);}
+.student-badge{font-family:var(--mono); font-size:11.5px; color:var(--ink); padding:5px 12px; border-radius:20px; background:#eaf3fc; border:1px solid var(--blue-dim);}
+.student-badge a{color:var(--coral); text-decoration:none; font-weight:700;}
+
+main{max-width:820px; margin:0 auto; padding:44px 20px 80px;}
+.eyebrow{font-family:var(--mono); font-size:13px; color:#189a63; font-weight:700;}
+.eyebrow::before{content:"›_ ";}
+h1.title{font-family:var(--display); font-weight:700; font-size:clamp(26px,4.2vw,36px); margin:12px 0 8px; color:var(--ink);}
+.subtitle{color:var(--text-dim); font-size:15px; max-width:680px;}
+.info-card{ margin-top:22px; background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:18px 20px; box-shadow:0 8px 24px -16px rgba(47,123,199,.25);}
+
+.qcard{background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:18px 20px; margin-bottom:14px; box-shadow:0 6px 18px -14px rgba(20,40,60,.3);}
+.qnum{font-family:var(--mono); font-weight:700; font-size:13px; color:#fff; background:var(--blue); width:26px; height:26px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; margin-right:8px;}
+.qcard:nth-of-type(5n+2) .qnum{background:var(--coral);}
+.qcard:nth-of-type(5n+3) .qnum{background:var(--green);}
+.qcard:nth-of-type(5n+4) .qnum{background:var(--purple);}
+.qcard:nth-of-type(5n+5) .qnum{background:var(--pink);}
+.qtext{font-size:15px; color:var(--ink); margin:0 0 12px; display:inline;}
+.qcode{
+  display:block; background:var(--code-bg); color:var(--code-text); font-family:var(--mono); font-size:13px;
+  padding:12px 14px; border-radius:8px; margin:10px 0; white-space:pre-wrap;
+}
+.opt{display:flex; align-items:center; gap:10px; padding:9px 12px; border:1px solid var(--border); border-radius:8px; margin-bottom:8px; cursor:pointer; font-size:14.5px;}
+.opt:hover{border-color:var(--blue-dim); background:#f7fbff;}
+.opt input{margin:0;}
+.fillinput{width:100%; background:var(--panel-alt); border:1px solid var(--border); border-radius:7px; color:var(--ink); font-family:var(--mono); font-size:14px; padding:9px 11px; margin-top:6px;}
+.fillinput:focus{outline:2px solid var(--blue-dim); border-color:var(--blue);}
+.section-label{font-family:var(--mono); font-size:12px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; margin:30px 0 14px;}
+
+.submit-row{margin-top:30px; text-align:center;}
+.submit-btn{
+  font-family:var(--display); font-weight:700; font-size:16px; color:#fff; background:var(--green);
+  border:none; padding:15px 34px; border-radius:30px; cursor:pointer;
+  box-shadow:0 12px 26px -8px rgba(31,174,114,.55);
+}
+.submit-btn:hover{background:#189a63;}
+.submit-btn:disabled{opacity:.6; cursor:wait;}
+
+.result-card{
+  background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:40px 30px; text-align:center;
+  box-shadow:0 20px 50px -20px rgba(20,60,100,.35); margin-top:30px;
+}
+.result-score{font-family:var(--display); font-weight:700; font-size:52px; color:var(--green); margin:10px 0;}
+.result-msg{font-size:15px; color:var(--text-dim);}
+
+footer{text-align:center; padding:34px 20px 60px; color:var(--text-dim); font-size:13px; font-family:var(--mono);}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="tab-row">
+    <div class="tab-left">
+      <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <div class="filename">📝 <b>quiz</b>.py</div>
+    </div>
+    <div class="tab-right">
+      <span class="student-badge" id="student-badge">👤 กำลังตรวจสอบ...</span>
+      <a class="back-link" href="index.html">← กลับหน้าสรุปความรู้</a>
+    </div>
+  </div>
+</div>
+
+<main>
+  <div class="eyebrow">แบบทดสอบท้ายบท</div>
+  <h1 class="title">แบบทดสอบความรู้ภาษา Python</h1>
+  <p class="subtitle">ปรนัย 10 ข้อ + เติมคำในโปรแกรม 5 ข้อ รวม 10 คะแนน — ทำได้เพียงครั้งเดียวเท่านั้น ตั้งใจทำให้ดีนะ!</p>
+
+  <div id="loading-box" class="info-card">⏳ กำลังตรวจสอบสิทธิ์การทำแบบทดสอบ...</div>
+
+  <div id="already-done-box" style="display:none;">
+    <div class="result-card">
+      <div style="font-size:40px;">✅</div>
+      <p class="result-msg">คุณทำแบบทดสอบนี้ไปแล้ว ได้คะแนน</p>
+      <div class="result-score" id="prev-score">-</div>
+      <p class="result-msg">แบบทดสอบนี้ทำได้เพียงครั้งเดียวเท่านั้น</p>
+    </div>
+  </div>
+
+  <form id="quiz-form" style="display:none;" onsubmit="return submitQuiz(event)">
+    <p class="section-label">ตอนที่ 1 — ปรนัย (10 ข้อ ข้อละ 0.5 คะแนน)</p>
+    <div id="mc-container"></div>
+
+    <p class="section-label">ตอนที่ 2 — เติมคำในโปรแกรมที่ขาดหายไป (5 ข้อ ข้อละ 1 คะแนน)</p>
+    <div id="fill-container"></div>
+
+    <div class="submit-row">
+      <button class="submit-btn" id="submit-btn" type="submit">📤 ส่งคำตอบ</button>
+    </div>
+  </form>
+
+  <div id="result-box" style="display:none;">
+    <div class="result-card">
+      <div style="font-size:40px;">🎉</div>
+      <p class="result-msg">คุณทำแบบทดสอบเสร็จแล้ว ได้คะแนน</p>
+      <div class="result-score" id="final-score">-</div>
+      <p class="result-msg" id="result-note"></p>
+    </div>
+  </div>
+</main>
+<footer>&lt;/&gt; แบบทดสอบท้ายบท — วิชาเทคโนโลยี (การเขียนโปรแกรม) ม.2</footer>
+
+<script>
+const SHEET_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwU2rJcL17NlBXEUma2YBw141NRLK6nj3WvUxx2l2U0ovl146ovUXg9OOi4Ic442OsGHw/exec";
+let CURRENT_STUDENT = null;
+
+const MC_QUESTIONS = [
+  { q: "Python คือภาษาระดับใด?", opts: ["ระดับต่ำ", "ระดับสูง", "ระดับกลาง", "ไม่มีระดับ"], correct: 1 },
+  { q: "คำสั่งใดใช้แสดงผลออกทางหน้าจอ?", opts: ["input()", "print()", "return()", "def()"], correct: 1 },
+  { q: "ผลลัพธ์ของ 7 // 2 คือเท่าไร?", opts: ["3.5", "3", "4", "1"], correct: 1 },
+  { q: "ค่า 3.14 มีชนิดข้อมูลใด?", opts: ["int", "str", "float", "bool"], correct: 2 },
+  { q: "เครื่องหมายใดใช้เปรียบเทียบว่า \\u201cเท่ากับ\\u201d?", opts: ["=", "==", "!=", "=>"], correct: 1 },
+  { q: "คำสั่งใดเหมาะกับการทำซ้ำแบบกำหนดจำนวนรอบแน่นอน?", opts: ["if", "while", "for", "def"], correct: 2 },
+  { q: "range(1, 6) ให้ค่าตัวเลขชุดใด?", opts: ["1 ถึง 6", "1 ถึง 5", "0 ถึง 5", "0 ถึง 6"], correct: 1 },
+  { q: "โครงสร้างข้อมูลใดเก็บข้อมูลแบบคู่ key : value?", opts: ["list", "tuple", "dictionary", "string"], correct: 2 },
+  { q: "คำสั่งใดใช้สร้างฟังก์ชันใน Python?", opts: ["func", "def", "function", "create"], correct: 1 },
+  { q: "เครื่องหมาย # ใช้สำหรับอะไร?", opts: ["คำนวณ", "เปรียบเทียบ", "เขียนคอมเมนต์", "ประกาศตัวแปร"], correct: 2 },
+];
+
+const FILL_QUESTIONS = [
+  { code: 'for i in ____(1, 6):\\n    print(i)', answer: 'range', hint: 'คำสั่งสร้างลำดับตัวเลข' },
+  { code: 'name = ____("ชื่อของคุณ: ")', answer: 'input', hint: 'คำสั่งรับข้อมูลจากผู้ใช้' },
+  { code: 'if score >= 80:\\n    print("A")\\n____:\\n    print("B")', answer: 'elif', hint: 'ใช้ตรวจเงื่อนไขถัดไปเมื่อเงื่อนไขแรกไม่จริง' },
+  { code: "fruits = ['apple', 'banana']\\nprint(____(fruits))", answer: 'len', hint: 'หาจำนวนสมาชิกใน list' },
+  { code: 'def greet(name):\\n    ____ "สวัสดี " + name', answer: 'return', hint: 'คำสั่งส่งค่ากลับจากฟังก์ชัน' },
+];
+
+function jsonp(url){
+  return new Promise(function(resolve, reject){
+    const cbName = 'jsonp_cb_' + Math.random().toString(36).slice(2);
+    const script = document.createElement('script');
+    window[cbName] = function(data){ resolve(data); delete window[cbName]; script.remove(); };
+    script.onerror = function(){ reject(new Error('jsonp failed')); delete window[cbName]; script.remove(); };
+    script.src = url + (url.indexOf('?') >= 0 ? '&' : '?') + 'callback=' + cbName;
+    document.body.appendChild(script);
+  });
+}
+
+function renderStudentBadge(sid, info){
+  const el = document.getElementById('student-badge');
+  if(info && info.name){
+    el.innerHTML = '👤 ' + info.name + ' (' + (info.klass||'-') + ' เลขที่ ' + (info.number||'-') + ')';
+  } else {
+    el.innerHTML = '👤 รหัส ' + sid;
+  }
+}
+
+function renderQuestions(){
+  const mcBox = document.getElementById('mc-container');
+  MC_QUESTIONS.forEach(function(item, i){
+    const div = document.createElement('div');
+    div.className = 'qcard';
+    let optsHtml = '';
+    item.opts.forEach(function(opt, oi){
+      optsHtml += '<label class="opt"><input type="radio" name="mc' + i + '" value="' + oi + '"> ' + opt + '</label>';
+    });
+    div.innerHTML = '<p class="qtext"><span class="qnum">' + (i+1) + '</span>' + item.q + '</p>' + optsHtml;
+    mcBox.appendChild(div);
+  });
+
+  const fillBox = document.getElementById('fill-container');
+  FILL_QUESTIONS.forEach(function(item, i){
+    const div = document.createElement('div');
+    div.className = 'qcard';
+    div.innerHTML = '<p class="qtext"><span class="qnum">' + (i+1) + '</span>เติมคำที่ขาดหายไปในโปรแกรมนี้</p>' +
+      '<code class="qcode">' + item.code + '</code>' +
+      '<input class="fillinput" id="fill' + i + '" type="text" placeholder="พิมพ์คำตอบ...">' +
+      '<p style="font-size:12px;color:var(--text-dim);margin:6px 0 0;">💡 ' + item.hint + '</p>';
+    fillBox.appendChild(div);
+  });
+}
+
+function gradeQuiz(){
+  let score = 0;
+  const answers = { mc: [], fill: [] };
+  MC_QUESTIONS.forEach(function(item, i){
+    const sel = document.querySelector('input[name="mc' + i + '"]:checked');
+    const val = sel ? parseInt(sel.value, 10) : -1;
+    answers.mc.push(val);
+    if(val === item.correct) score += 0.5;
+  });
+  FILL_QUESTIONS.forEach(function(item, i){
+    const val = (document.getElementById('fill' + i).value || '').trim().toLowerCase();
+    answers.fill.push(val);
+    if(val === item.answer.toLowerCase()) score += 1;
+  });
+  return { score: Math.round(score*100)/100, answers: answers };
+}
+
+async function submitQuiz(ev){
+  ev.preventDefault();
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ กำลังส่ง...';
+
+  const result = gradeQuiz();
+
+  document.getElementById('quiz-form').style.display = 'none';
+  document.getElementById('final-score').textContent = result.score + ' / 10';
+  document.getElementById('result-note').textContent =
+    result.score >= 8 ? 'ยอดเยี่ยมมาก! 🌟' : result.score >= 5 ? 'ทำได้ดี ลองทบทวนเพิ่มอีกนิด 👍' : 'ลองทบทวนบทเรียนอีกครั้งนะ สู้ๆ 💪';
+  document.getElementById('result-box').style.display = 'block';
+
+  if(CURRENT_STUDENT && SHEET_WEBAPP_URL){
+    try{
+      await fetch(SHEET_WEBAPP_URL, {
+        method: 'POST', mode: 'no-cors', headers: {'Content-Type':'text/plain'},
+        body: JSON.stringify({
+          action: 'submit_quiz',
+          studentId: CURRENT_STUDENT.id,
+          name: CURRENT_STUDENT.name || '',
+          klass: CURRENT_STUDENT.klass || '',
+          number: CURRENT_STUDENT.number || '',
+          score: result.score,
+          maxScore: 10,
+          answersJSON: JSON.stringify(result.answers)
+        })
+      });
+    }catch(e){}
+  }
+  localStorage.setItem('quiz_done_' + (CURRENT_STUDENT ? CURRENT_STUDENT.id : ''), '1');
+  return false;
+}
+
+async function init(){
+  const params = new URLSearchParams(window.location.search);
+  let sid = params.get('sid');
+  if(!sid){ sid = localStorage.getItem('studentId'); }
+  if(!sid){ window.location.href = 'login.html'; return; }
+  localStorage.setItem('studentId', sid);
+
+  let info = null;
+  try{
+    const res = await jsonp(SHEET_WEBAPP_URL + '?action=load_roster&studentId=' + encodeURIComponent(sid));
+    if(res && res.found){ info = { id: sid, name: res.name, klass: res.klass, number: res.number }; }
+  }catch(e){}
+  if(!info) info = { id: sid, name: null, klass: null, number: null };
+  CURRENT_STUDENT = info;
+  renderStudentBadge(sid, info);
+
+  const doneLocal = localStorage.getItem('quiz_done_' + sid);
+  let already = null;
+  try{
+    already = await jsonp(SHEET_WEBAPP_URL + '?action=check_quiz&studentId=' + encodeURIComponent(sid));
+  }catch(e){}
+
+  document.getElementById('loading-box').style.display = 'none';
+
+  if((already && already.taken) || doneLocal === '1'){
+    document.getElementById('prev-score').textContent =
+      (already && already.taken) ? (already.score + ' / ' + already.maxScore) : 'ทำแล้ว (กำลังส่งคะแนน)';
+    document.getElementById('already-done-box').style.display = 'block';
+  } else {
+    renderQuestions();
+    document.getElementById('quiz-form').style.display = 'block';
+  }
+}
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
