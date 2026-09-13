@@ -81,6 +81,9 @@ h1.title{font-family:var(--display); font-weight:700; font-size:clamp(26px,4.2vw
 }
 .result-score{font-family:var(--display); font-weight:700; font-size:52px; color:var(--green); margin:10px 0;}
 .result-msg{font-size:15px; color:var(--text-dim);}
+.sync-status{font-family:var(--mono); font-size:12px; margin-top:16px; padding:8px 12px; border-radius:8px; display:inline-block;}
+.sync-status.ok{color:var(--green); background:#eafff5;}
+.sync-status.err{color:var(--red); background:#fff0f0;}
 
 footer{text-align:center; padding:34px 20px 60px; color:var(--text-dim); font-size:13px; font-family:var(--mono);}
 </style>
@@ -133,6 +136,7 @@ footer{text-align:center; padding:34px 20px 60px; color:var(--text-dim); font-si
       <p class="result-msg">คุณทำแบบทดสอบเสร็จแล้ว ได้คะแนน</p>
       <div class="result-score" id="final-score">-</div>
       <p class="result-msg" id="result-note"></p>
+      <p class="sync-status" id="sync-status"></p>
     </div>
   </div>
 </main>
@@ -183,21 +187,42 @@ function renderStudentBadge(sid, info){
   }
 }
 
+let RENDERED_MC = [];   // [{ correctText, }] indexed by rendered position
+let RENDERED_FILL = []; // [{ answer }] indexed by rendered position
+
+function shuffleArray(arr){
+  const a = arr.slice();
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    const tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+  }
+  return a;
+}
+
 function renderQuestions(){
   const mcBox = document.getElementById('mc-container');
-  MC_QUESTIONS.forEach(function(item, i){
+  const shuffledMC = shuffleArray(MC_QUESTIONS);
+  RENDERED_MC = [];
+  shuffledMC.forEach(function(item, i){
+    const correctText = item.opts[item.correct];
+    RENDERED_MC.push({ correctText: correctText });
+
+    const shuffledOpts = shuffleArray(item.opts);
     const div = document.createElement('div');
     div.className = 'qcard';
     let optsHtml = '';
-    item.opts.forEach(function(opt, oi){
-      optsHtml += '<label class="opt"><input type="radio" name="mc' + i + '" value="' + oi + '"> ' + opt + '</label>';
+    shuffledOpts.forEach(function(opt){
+      optsHtml += '<label class="opt"><input type="radio" name="mc' + i + '" value="' + opt.replace(/"/g, '&quot;') + '"> ' + opt + '</label>';
     });
     div.innerHTML = '<p class="qtext"><span class="qnum">' + (i+1) + '</span>' + item.q + '</p>' + optsHtml;
     mcBox.appendChild(div);
   });
 
   const fillBox = document.getElementById('fill-container');
-  FILL_QUESTIONS.forEach(function(item, i){
+  const shuffledFill = shuffleArray(FILL_QUESTIONS);
+  RENDERED_FILL = [];
+  shuffledFill.forEach(function(item, i){
+    RENDERED_FILL.push({ answer: item.answer });
     const div = document.createElement('div');
     div.className = 'qcard';
     div.innerHTML = '<p class="qtext"><span class="qnum">' + (i+1) + '</span>เติมคำที่ขาดหายไปในโปรแกรมนี้</p>' +
@@ -208,16 +233,17 @@ function renderQuestions(){
   });
 }
 
+
 function gradeQuiz(){
   let score = 0;
   const answers = { mc: [], fill: [] };
-  MC_QUESTIONS.forEach(function(item, i){
+  RENDERED_MC.forEach(function(item, i){
     const sel = document.querySelector('input[name="mc' + i + '"]:checked');
-    const val = sel ? parseInt(sel.value, 10) : -1;
+    const val = sel ? sel.value : null;
     answers.mc.push(val);
-    if(val === item.correct) score += 0.5;
+    if(val !== null && val === item.correctText) score += 0.5;
   });
-  FILL_QUESTIONS.forEach(function(item, i){
+  RENDERED_FILL.forEach(function(item, i){
     const val = (document.getElementById('fill' + i).value || '').trim().toLowerCase();
     answers.fill.push(val);
     if(val === item.answer.toLowerCase()) score += 1;
@@ -239,24 +265,34 @@ async function submitQuiz(ev){
     result.score >= 8 ? 'ยอดเยี่ยมมาก! 🌟' : result.score >= 5 ? 'ทำได้ดี ลองทบทวนเพิ่มอีกนิด 👍' : 'ลองทบทวนบทเรียนอีกครั้งนะ สู้ๆ 💪';
   document.getElementById('result-box').style.display = 'block';
 
-  if(CURRENT_STUDENT && SHEET_WEBAPP_URL){
-    try{
-      await fetch(SHEET_WEBAPP_URL, {
-        method: 'POST', mode: 'no-cors', headers: {'Content-Type':'text/plain'},
-        body: JSON.stringify({
-          action: 'submit_quiz',
-          studentId: CURRENT_STUDENT.id,
-          name: CURRENT_STUDENT.name || '',
-          klass: CURRENT_STUDENT.klass || '',
-          number: CURRENT_STUDENT.number || '',
-          score: result.score,
-          maxScore: 10,
-          answersJSON: JSON.stringify(result.answers)
-        })
-      });
-    }catch(e){}
-  }
   localStorage.setItem('quiz_done_' + (CURRENT_STUDENT ? CURRENT_STUDENT.id : ''), '1');
+
+  const syncEl = document.getElementById('sync-status');
+  if(CURRENT_STUDENT && SHEET_WEBAPP_URL){
+    syncEl.textContent = '⏳ กำลังบันทึกคะแนนไปที่ Google Sheet...';
+    syncEl.className = 'sync-status';
+    const qs = 'action=submit_quiz' +
+      '&studentId=' + encodeURIComponent(CURRENT_STUDENT.id) +
+      '&name=' + encodeURIComponent(CURRENT_STUDENT.name || '') +
+      '&klass=' + encodeURIComponent(CURRENT_STUDENT.klass || '') +
+      '&number=' + encodeURIComponent(CURRENT_STUDENT.number || '') +
+      '&score=' + encodeURIComponent(result.score) +
+      '&maxScore=10' +
+      '&answersJSON=' + encodeURIComponent(JSON.stringify(result.answers));
+    try{
+      const res = await jsonp(SHEET_WEBAPP_URL + '?' + qs);
+      if(res && res.status === 'ok'){
+        syncEl.textContent = res.saved ? '✅ บันทึกคะแนนลง Google Sheet เรียบร้อยแล้ว' : 'ℹ️ มีคะแนนของคุณอยู่ในระบบแล้ว (ไม่บันทึกซ้ำ)';
+        syncEl.className = 'sync-status ok';
+      } else {
+        syncEl.textContent = '⚠️ บันทึกลง Google Sheet ไม่สำเร็จ — คะแนนนี้แสดงผลถูกต้อง แต่กรุณาแจ้งครูผู้สอน';
+        syncEl.className = 'sync-status err';
+      }
+    }catch(e){
+      syncEl.textContent = '⚠️ เชื่อมต่อ Google Sheet ไม่ได้ — คะแนนนี้แสดงผลถูกต้อง แต่กรุณาแจ้งครูผู้สอน';
+      syncEl.className = 'sync-status err';
+    }
+  }
   return false;
 }
 
