@@ -6,6 +6,7 @@
 <title>python.py — สรุปความรู้ภาษา Python สำหรับ ม.ต้น</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@500;600;700&family=Sarabun:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="roster.js"></script>
 <style>
 :root{
   --bg:#f2f8fd;
@@ -662,21 +663,13 @@ async function initAuth(){
   const params = new URLSearchParams(window.location.search);
   let sid = params.get('sid');
   if(!sid){ sid = localStorage.getItem('studentId'); }
-  if(!sid){ window.location.href = 'login.html'; return; }
+  if(!sid || typeof ROSTER_DATA === 'undefined' || !ROSTER_DATA[sid]){ window.location.href = 'login.html'; return; }
   localStorage.setItem('studentId', sid);
   propagateSidLinks(sid);
 
   const badge = document.getElementById('student-badge');
-  try{
-    const res = await jsonp(SHEET_WEBAPP_URL + '?action=load_roster&studentId=' + encodeURIComponent(sid));
-    if(res && res.found){
-      badge.innerHTML = '👤 ' + res.name + ' (' + (res.klass||'-') + ' เลขที่ ' + (res.number||'-') + ') &nbsp;·&nbsp; <a href="#" onclick="logout(); return false;">ออกจากระบบ</a>';
-    } else {
-      badge.innerHTML = '👤 รหัส ' + sid + ' &nbsp;·&nbsp; <a href="#" onclick="logout(); return false;">ออกจากระบบ</a>';
-    }
-  }catch(e){
-    badge.innerHTML = '👤 รหัส ' + sid;
-  }
+  const r = ROSTER_DATA[sid];
+  badge.innerHTML = '👤 ' + r.name + ' (' + (r.klass||'-') + ' เลขที่ ' + (r.number||'-') + ') &nbsp;·&nbsp; <a href="#" onclick="logout(); return false;">ออกจากระบบ</a>';
 }
 document.addEventListener('DOMContentLoaded', initAuth);
 </script>

@@ -6,6 +6,7 @@
 <title>แบบทดสอบท้ายบท — Python ม.2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@500;600;700&family=Sarabun:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="roster.js"></script>
 <style>
 :root{
   --bg:#f2f8fd; --bg2:#e7f1fa; --panel:#ffffff; --panel-alt:#f3f8fc;
@@ -263,15 +264,11 @@ async function init(){
   const params = new URLSearchParams(window.location.search);
   let sid = params.get('sid');
   if(!sid){ sid = localStorage.getItem('studentId'); }
-  if(!sid){ window.location.href = 'login.html'; return; }
+  if(!sid || typeof ROSTER_DATA === 'undefined' || !ROSTER_DATA[sid]){ window.location.href = 'login.html'; return; }
   localStorage.setItem('studentId', sid);
 
-  let info = null;
-  try{
-    const res = await jsonp(SHEET_WEBAPP_URL + '?action=load_roster&studentId=' + encodeURIComponent(sid));
-    if(res && res.found){ info = { id: sid, name: res.name, klass: res.klass, number: res.number }; }
-  }catch(e){}
-  if(!info) info = { id: sid, name: null, klass: null, number: null };
+  const r = ROSTER_DATA[sid];
+  const info = { id: sid, name: r.name, klass: r.klass, number: r.number };
   CURRENT_STUDENT = info;
   renderStudentBadge(sid, info);
 
